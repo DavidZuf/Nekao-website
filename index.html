@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEKAO — Drop Bientôt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --black: #080808;
+      --cream: #f0ebe1;
+      --blue: #3b5bdb;
+      --blue-muted: #2c4ab5;
+      --grain-opacity: 0.055;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--black);
+      color: var(--cream);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* Grain texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      opacity: var(--grain-opacity);
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Animated vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%);
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* Subtle animated background gradient */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 80%, rgba(59,91,219,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 30% at 80% 20%, rgba(59,91,219,0.05) 0%, transparent 60%);
+      animation: bgShift 12s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+
+    @keyframes bgShift {
+      0% { opacity: 0.6; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.08); }
+    }
+
+    /* Main layout */
+    .wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 2rem;
+    }
+
+    /* ——— LOGO ——— */
+    .logo-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 3.5rem;
+      animation: fadeDown 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cobra emblem SVG */
+    .cobra-emblem {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
+
+    .logo-word {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 14vw, 11rem);
+      letter-spacing: 0.18em;
+      color: var(--cream);
+      line-height: 1;
+      position: relative;
+      user-select: none;
+    }
+
+    /* Mirrored subtitle under logo */
+    .logo-sub {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.55rem, 1.2vw, 0.75rem);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(240,235,225,0.35);
+      margin-top: 0.5rem;
+    }
+
+    /* ——— DROP LABEL ——— */
+    .drop-label {
+      font-size: clamp(0.6rem, 1.4vw, 0.8rem);
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 1.6rem;
+      animation: fadeUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ——— COUNTDOWN ——— */
+    .countdown {
+      display: flex;
+      gap: clamp(1.5rem, 5vw, 4rem);
+      align-items: flex-start;
+      animation: fadeUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+    }
+
+    .unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .unit-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 10vw, 8rem);
+      line-height: 1;
+      color: var(--cream);
+      min-width: 2ch;
+      text-align: center;
+      position: relative;
+      transition: transform 0.15s ease;
+    }
+
+    .unit-value.tick {
+      transform: scaleY(0.92);
+    }
+
+    /* Thin separator line between numbers */
+    .unit-value::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: rgba(240,235,225,0.08);
+    }
+
+    .unit-label {
+      font-size: clamp(0.45rem, 1vw, 0.6rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: rgba(240,235,225,0.3);
+      font-weight: 300;
+    }
+
+    .separator {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      color: rgba(240,235,225,0.15);
+      line-height: 1;
+      margin-top: 0.05em;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.15; }
+      50% { opacity: 0.04; }
+    }
+
+    /* ——— BOTTOM LINE ——— */
+    .bottom-line {
+      position: fixed;
+      bottom: 2.5rem;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 3rem;
+      animation: fadeUp 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both;
+      z-index: 10;
+    }
+
+    .bottom-tag {
+      font-size: clamp(0.45rem, 1vw, 0.58rem);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(240,235,225,0.2);
+      font-weight: 300;
+    }
+
+    .bottom-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(240,235,225,0.15);
+    }
+
+    /* ——— NOTIFY BUTTON ——— */
+    .notify-wrap {
+      margin-top: 3rem;
+      animation: fadeUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.7s both;
+    }
+
+    .notify-form {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid rgba(240,235,225,0.15);
+      border-radius: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .notify-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 0.8rem 1.2rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--cream);
+      width: clamp(180px, 22vw, 240px);
+    }
+
+    .notify-input::placeholder {
+      color: rgba(240,235,225,0.25);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-size: 0.6rem;
+    }
+
+    .notify-btn {
+      background: var(--blue);
+      border: none;
+      padding: 0.8rem 1.4rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .notify-btn:hover {
+      background: var(--blue-muted);
+    }
+
+    .notify-success {
+      font-size: 0.62rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--blue);
+      display: none;
+      text-align: center;
+      padding: 0.8rem 0;
+    }
+
+    /* ——— MARQUEE at very top ——— */
+    .marquee-wrap {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(240,235,225,0.06);
+      padding: 0.6rem 0;
+      z-index: 10;
+      background: transparent;
+    }
+
+    .marquee-track {
+      display: flex;
+      white-space: nowrap;
+      animation: marquee 22s linear infinite;
+    }
+
+    .marquee-text {
+      font-size: 0.52rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: rgba(240,235,225,0.18);
+      padding-right: 4rem;
+      flex-shrink: 0;
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+
+  <!-- Marquee top bar -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span class="marquee-text">100% upcycling &nbsp;·&nbsp; 100% pièce unique &nbsp;·&nbsp; fait main à Paris &nbsp;·&nbsp; seconde main réinventé &nbsp;·&nbsp; drop bientôt &nbsp;·&nbsp; NEKAO &nbsp;·&nbsp; 100% upcycling &nbsp;·&nbsp; 100% pièce unique &nbsp;·&nbsp; fait main à Paris &nbsp;·&nbsp; seconde main réinventé &nbsp;·&nbsp; drop bientôt &nbsp;·&nbsp; NEKAO &nbsp;·</span>
+      <span class="marquee-text">100% upcycling &nbsp;·&nbsp; 100% pièce unique &nbsp;·&nbsp; fait main à Paris &nbsp;·&nbsp; seconde main réinventé &nbsp;·&nbsp; drop bientôt &nbsp;·&nbsp; NEKAO &nbsp;·&nbsp; 100% upcycling &nbsp;·&nbsp; 100% pièce unique &nbsp;·&nbsp; fait main à Paris &nbsp;·&nbsp; seconde main réinventé &nbsp;·&nbsp; drop bientôt &nbsp;·&nbsp; NEKAO &nbsp;·</span>
+    </div>
+  </div>
+
+  <div class="wrapper">
+
+    <!-- Logo block -->
+    <div class="logo-block">
+
+      <!-- Cobra emblem (SVG inline) -->
+      <svg class="cobra-emblem" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer mandala ring -->
+        <circle cx="100" cy="100" r="95" fill="none" stroke="#3b5bdb" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="100" cy="100" r="85" fill="none" stroke="#3b5bdb" stroke-width="0.8" opacity="0.3"/>
+        <!-- Decorative petals around ring -->
+        <g opacity="0.4" stroke="#3b5bdb" stroke-width="1" fill="none">
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(0 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(30 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(60 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(90 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(120 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(150 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(180 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(210 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(240 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(270 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(300 100 100)"/>
+          <ellipse cx="100" cy="10" rx="4" ry="8" transform="rotate(330 100 100)"/>
+        </g>
+        <!-- Inner cobra silhouette (simplified) -->
+        <g transform="translate(100,100)">
+          <!-- Body coil -->
+          <path d="M0,35 C-20,35 -35,20 -35,0 C-35,-25 -10,-40 0,-40 C10,-40 20,-32 20,-20 C20,-8 10,0 0,0 C-10,0 -15,8 -15,18 C-15,28 -8,35 0,35 Z"
+                fill="none" stroke="#3b5bdb" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+          <!-- Head -->
+          <ellipse cx="0" cy="-44" rx="9" ry="7" fill="#3b5bdb" opacity="0.7"/>
+          <!-- Hood spread -->
+          <path d="M-18,-38 C-24,-50 -10,-60 0,-55 C10,-60 24,-50 18,-38"
+                fill="#3b5bdb" opacity="0.25"/>
+          <!-- Eye -->
+          <circle cx="-3" cy="-44" r="2" fill="#f0ebe1" opacity="0.9"/>
+          <circle cx="3" cy="-44" r="2" fill="#f0ebe1" opacity="0.9"/>
+          <circle cx="-3" cy="-44" r="0.8" fill="#080808"/>
+          <circle cx="3" cy="-44" r="0.8" fill="#080808"/>
+          <!-- Tongue -->
+          <path d="M0,-50 L-4,-57 M0,-50 L4,-57" stroke="#3b5bdb" stroke-width="1" stroke-linecap="round" opacity="0.8"/>
+        </g>
+      </svg>
+
+      <h1 class="logo-word">NEKAO</h1>
+      <p class="logo-sub">Paris &nbsp;·&nbsp; Upcycling &nbsp;·&nbsp; Pièce Unique</p>
+    </div>
+
+    <!-- Drop label -->
+    <p class="drop-label">Drop 01 — Bientôt</p>
+
+    <!-- Countdown timer -->
+    <div class="countdown" id="countdown">
+      <div class="unit">
+        <span class="unit-value" id="days">00</span>
+        <span class="unit-label">Jours</span>
+      </div>
+      <span class="separator">:</span>
+      <div class="unit">
+        <span class="unit-value" id="hours">00</span>
+        <span class="unit-label">Heures</span>
+      </div>
+      <span class="separator">:</span>
+      <div class="unit">
+        <span class="unit-value" id="minutes">00</span>
+        <span class="unit-label">Minutes</span>
+      </div>
+      <span class="separator">:</span>
+      <div class="unit">
+        <span class="unit-value" id="seconds">00</span>
+        <span class="unit-label">Secondes</span>
+      </div>
+    </div>
+
+    <!-- Notify form -->
+    <div class="notify-wrap">
+      <form class="notify-form" id="notifyForm" onsubmit="handleNotify(event)">
+        <input class="notify-input" type="email" placeholder="Ton email" required id="emailInput"/>
+        <button class="notify-btn" type="submit">Me notifier</button>
+      </form>
+      <p class="notify-success" id="notifySuccess">✓ &nbsp; Tu seras le premier informé</p>
+    </div>
+
+  </div>
+
+  <!-- Bottom line -->
+  <div class="bottom-line">
+    <span class="bottom-tag">Fait main</span>
+    <span class="bottom-dot"></span>
+    <span class="bottom-tag">Paris</span>
+    <span class="bottom-dot"></span>
+    <span class="bottom-tag">Seconde main réinventé</span>
+    <span class="bottom-dot"></span>
+    <span class="bottom-tag">@nekao.paris</span>
+  </div>
+
+  <script>
+    // ——— Countdown target date ———
+    // Set your drop date here (YYYY, MM-1, DD, HH, MM, SS)
+    const dropDate = new Date('2026-04-19T12:00:00');
+
+    const pad = n => String(n).padStart(2, '0');
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = dropDate - now;
+
+      if (diff <= 0) {
+        document.getElementById('days').textContent = '00';
+        document.getElementById('hours').textContent = '00';
+        document.getElementById('minutes').textContent = '00';
+        document.getElementById('seconds').textContent = '00';
+        return;
+      }
+
+      const totalSecs = Math.floor(diff / 1000);
+      const days    = Math.floor(totalSecs / 86400);
+      const hours   = Math.floor((totalSecs % 86400) / 3600);
+      const minutes = Math.floor((totalSecs % 3600) / 60);
+      const seconds = totalSecs % 60;
+
+      const secEl = document.getElementById('seconds');
+      const oldSec = secEl.textContent;
+      const newSec = pad(seconds);
+
+      if (oldSec !== newSec) {
+        secEl.classList.add('tick');
+        setTimeout(() => secEl.classList.remove('tick'), 150);
+      }
+
+      document.getElementById('days').textContent    = pad(days);
+      document.getElementById('hours').textContent   = pad(hours);
+      document.getElementById('minutes').textContent = pad(minutes);
+      secEl.textContent = newSec;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // ——— Notify form ———
+    function handleNotify(e) {
+      e.preventDefault();
+      const form = document.getElementById('notifyForm');
+      const success = document.getElementById('notifySuccess');
+      form.style.display = 'none';
+      success.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
