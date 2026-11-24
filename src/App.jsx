@@ -66,7 +66,7 @@ export default function App() {
     <>
       <Header
         path={path}
-        overlay={inApartment}
+        overlay={inApartment || !section}
         center={inApartment && room ? <><span className="eyebrow">Apt. 01</span><strong>{room.name}</strong></> : null}
         onBag={() => setBagOpen(true)}
         bagCount={bag.length}

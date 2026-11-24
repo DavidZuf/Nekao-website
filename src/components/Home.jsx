@@ -1,41 +1,33 @@
+import { lazy, Suspense, useState } from 'react';
 import { PRODUCTS, MODELS, ROOMS } from '../data.js';
 import { Link, navigate } from '../router.jsx';
 import ProductCard from './ProductCard.jsx';
 import Footer from './Footer.jsx';
 
+// The live living room, seen through the peephole. Click to go in.
+const World = lazy(() => import('../world/World.jsx'));
+const PEEP_VIEW = [-0.8, -0.1, 0.4]; // x, z, yaw: Daisy and Gigi on the sofa
+
 export default function Home() {
-  const enter = () => navigate('/apartment');
+  const [entering, setEntering] = useState(false);
+  const enter = () => {
+    if (entering) return;
+    setEntering(true);
+    setTimeout(() => navigate('/apartment/living'), 650);
+  };
   return (
     <main className="page">
-      <section className="entrance">
-        <div className="entrance-copy">
-          <p className="eyebrow">Drop 01 — now open</p>
-          <h1>The<br />Apartment</h1>
-          <p className="lead">
-            Our tees don't live on hangers. They live here. Walk through the rooms,
-            meet the residents, and take home what they're wearing.
-          </p>
-          <div className="entrance-actions">
-            <Link to="/apartment" className="btn btn--light">
-              Enter the apartment
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </Link>
-            <a href="#drop" className="btn btn--ghost">Shop the drop</a>
-          </div>
-        </div>
-
-        <div className="door-scene" aria-hidden="true">
-          <div className="door-frame">
-            <button type="button" className="door" onClick={enter} tabIndex={-1}>
-              <span className="peephole" />
-              <img src="/logo_dark.png" alt="" />
-              <span className="apt">APT. 01</span>
-            </button>
-          </div>
-          <button type="button" className="bell" onClick={enter} tabIndex={-1}><span /></button>
-          <div className="mat">COME IN</div>
-        </div>
-        <div className="entrance-floor" />
+      <section className="peep-hero">
+        <button
+          type="button"
+          className={`peep ${entering ? 'is-entering' : ''}`}
+          onClick={enter}
+          aria-label="Look inside the apartment"
+        >
+          <Suspense fallback={null}>
+            <World preview={PEEP_VIEW} active={false} />
+          </Suspense>
+        </button>
       </section>
 
       <section className="section" id="drop">

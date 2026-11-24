@@ -45,11 +45,15 @@ const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // The 3D apartment you walk around in.
 // Placeholder geometry: in the real version, the scan of the apartment
 // (with the models frozen inside it) replaces buildApartment + buildModel.
-const World = forwardRef(function World({ active, onRoom, onNearby }, ref) {
+// `preview` = [x, z, yaw]: a fixed, gently swaying view with no controls
+// (the peephole on the homepage).
+const World = forwardRef(function World({ active, preview, onRoom, onNearby }, ref) {
   const mount = useRef(null);
   const api = useRef({});
   const activeRef = useRef(active);
   activeRef.current = active;
+  const previewRef = useRef(preview);
+  previewRef.current = preview;
 
   useEffect(() => {
     const el = mount.current;
@@ -157,9 +161,15 @@ const World = forwardRef(function World({ active, onRoom, onNearby }, ref) {
         m.group.userData.update?.(t, camera);
       });
 
-      if (!activeRef.current) return;
+      const pv = previewRef.current;
+      if (pv) {
+        [player.x, player.z] = pv;
+        player.yaw = pv[2] + Math.sin(t * 0.25) * 0.07;
+        player.pitch = -0.04 + Math.sin(t * 0.17) * 0.015;
+        placeCamera();
+      } else if (!activeRef.current) return;
 
-      if (mode === 'roam') {
+      if (mode === 'roam' && !pv) {
         // eased movement: speed builds up and settles instead of snapping
         const run = keys.has('run') ? 1.8 : 1;
         const k = 1 - Math.exp(-dt * 9);

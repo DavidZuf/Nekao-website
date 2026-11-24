@@ -5,7 +5,7 @@
   --muted: #c9c3b8;
   --quiet: #a8a196;
   --accent: #e8a33d;
-  --display: 'Bebas Neue', sans-serif;
+  --display: 'Cormorant Garamond', serif;
   --body: 'Space Grotesk', sans-serif;
 }
 
@@ -100,6 +100,20 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media (max-width: 1180px) {
   .header-center { display: none; }
 }
+
+/* ---------- peephole (home) ---------- */
+.peep-hero { position: relative; height: 100svh; min-height: 560px; display: grid; place-items: center; background: #060405; overflow: hidden; }
+.peep-hero::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"); }
+.peep {
+  position: relative; width: min(72vh, 84vw); aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; overflow: hidden; cursor: pointer; background: #0b0709;
+  box-shadow: 0 0 0 10px #18100c, 0 0 0 13px #6b5232, 0 0 0 16px #18100c, 0 0 120px rgba(255,42,109,0.25);
+  transition: transform 0.6s cubic-bezier(.6,0,.2,1), box-shadow 0.4s ease;
+}
+.peep:hover { transform: scale(1.02); box-shadow: 0 0 0 10px #18100c, 0 0 0 13px #8a6a40, 0 0 0 16px #18100c, 0 0 160px rgba(255,42,109,0.4); }
+.peep.is-entering { transform: scale(4); }
+.peep .world { pointer-events: none; transform: scale(1.18); }
+.peep::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, transparent 48%, rgba(0,0,0,0.55) 66%, #000 72%); }
 
 /* ---------- tour ---------- */
 .tour { position: relative; height: 100%; }
@@ -374,3 +388,16 @@ kbd {
   .card-badge { left: 6px; bottom: 6px; padding: 4px 6px; font-size: 9px; letter-spacing: 0.08em; }
   .residents { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 }
+
+/* ---------- serif look (from the peephole mockup) ---------- */
+.brand span { font-size: 22px; letter-spacing: 0.32em; font-weight: 500; }
+.brand img { width: 30px; height: 30px; }
+.header .link { font-family: var(--display); font-style: italic; font-size: 19px; letter-spacing: 0.01em; text-transform: none; }
+.header .link.is-active { color: var(--cream); text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.header-center strong { font-style: italic; font-weight: 400; font-size: 26px; letter-spacing: 0.02em; }
+.mobile-menu a { font-style: italic; font-weight: 400; letter-spacing: 0; }
+.section-title, .page-title, .shop-head h1, .pdp-info h1, .drawer h2, .map-head h2, .footer-news h2 { font-weight: 500; letter-spacing: -0.005em; line-height: 0.95; }
+.card-name { font-weight: 600; font-size: 22px; letter-spacing: 0.01em; }
+.speaker { font-style: italic; letter-spacing: 0.04em; font-weight: 500; }
+.about-grid h2, .help-block h2 { font-weight: 500; letter-spacing: 0; }
+.map-room { font-style: italic; letter-spacing: 0; }
