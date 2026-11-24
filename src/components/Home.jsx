@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from 'react';
 import { PRODUCTS, MODELS, ROOMS } from '../data.js';
 import { Link, navigate } from '../router.jsx';
-import ProductCard from './ProductCard.jsx';
+import ProductIndex from './ProductIndex.jsx';
 import Footer from './Footer.jsx';
 
 // The live living room, seen through the peephole. Click to go in.
@@ -31,25 +31,17 @@ export default function Home() {
       </section>
 
       <section className="section" id="drop">
-        <div className="shop-head">
-          <div>
-            <p className="eyebrow">Drop 01</p>
-            <h2 className="section-title">The tees</h2>
-          </div>
-          <Link to="/shop" className="link">Shop all →</Link>
+        <div className="wardrobe-head">
+          <h2 className="section-title">The wardrobe</h2>
+          <Link to="/shop" className="inline-link">Everything →</Link>
         </div>
-        <div className="shop-grid">
-          {Object.values(PRODUCTS).map((p) => <ProductCard key={p.id} product={p} />)}
-        </div>
+        <ProductIndex products={Object.values(PRODUCTS)} />
       </section>
 
       <section className="section">
-        <div className="shop-head">
-          <div>
-            <p className="eyebrow">Apt. 01</p>
-            <h2 className="section-title">The residents</h2>
-          </div>
-          <Link to="/apartment" className="link">Enter →</Link>
+        <div className="wardrobe-head">
+          <h2 className="section-title">The residents</h2>
+          <Link to="/apartment" className="inline-link">Go in →</Link>
         </div>
         <div className="residents">
           {MODELS.map((m) => {
