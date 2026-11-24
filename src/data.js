@@ -122,6 +122,17 @@ export const MODELS = [
     ]
   },
   {
+    id: 'vera', name: '[Vera]', room: 'kitchen', pos: [3.9, -2.4], face: Math.PI,
+    // standing cut-out (1.8 m tall), in front of the island counter
+    cutout: { src: './vera.png', w: 465, h: 1379, scale: 1.8 / 1379, anchor: [130, 1379] },
+    product: 'tee-vogue-kith',
+    lines: [
+      'You\'re just in time. I opened the good bottle.',
+      'Glasses are on the island. Don\'t touch the ashtray, that one\'s not mine.',
+      'The tee? Vogue and Kith. It goes with red wine and bad decisions.'
+    ]
+  },
+  {
     id: 'camille', name: '[Camille]', room: 'bedroom', pos: [4, 4.4], face: Math.PI,
     product: 'tee-grey', skin: '#d9b08c', hair: '#3a2416',
     lines: [

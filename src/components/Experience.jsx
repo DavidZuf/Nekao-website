@@ -18,6 +18,14 @@ export default function Experience({ onRoom, onShowTee, drawerOpen }) {
   const [talkReady, setTalkReady] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [help, setHelp] = useState(true);
+  const [toast, setToast] = useState(null);
+  const act = useCallback((n) => {
+    if (!n) return;
+    if (n.thing) {
+      const msg = world.current?.use(n.id);
+      if (msg) { setToast(msg); clearTimeout(act.timer); act.timer = setTimeout(() => setToast(null), 4200); }
+    } else talk(n);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const arrive = useCallback(() => {
     world.current?.teleport(travel.room.id);
@@ -54,7 +62,7 @@ export default function Experience({ onRoom, onShowTee, drawerOpen }) {
   useEffect(() => {
     const onKey = (e) => {
       if (drawerOpen || phase !== 'roam') return;
-      if ((e.key === 'e' || e.key === 'E') && nearby) talk(nearby);
+      if ((e.key === 'e' || e.key === 'E') && nearby) act(nearby);
       if (e.key === 'm' || e.key === 'M') setMapOpen((o) => !o);
       if (e.key === 'h' || e.key === 'H') setHelp((o) => !o);
     };
@@ -75,8 +83,8 @@ export default function Experience({ onRoom, onShowTee, drawerOpen }) {
       {phase === 'roam' && (
         <>
           {nearby && (
-            <button type="button" className="prompt" onClick={() => talk(nearby)}>
-              <kbd>E</kbd> Talk to {nearby.name}
+            <button type="button" className="prompt" onClick={() => act(nearby)}>
+              <kbd>E</kbd> {nearby.thing ? nearby.label : `Talk to ${nearby.name}`}
             </button>
           )}
 
@@ -100,6 +108,8 @@ export default function Experience({ onRoom, onShowTee, drawerOpen }) {
           </div>
         </>
       )}
+
+      {toast && <div className="toast">{toast}</div>}
 
       {mapOpen && (
         <div className="map" role="dialog" aria-label="Floor plan">

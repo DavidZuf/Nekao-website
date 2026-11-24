@@ -161,7 +161,7 @@ export function buildApartment(scene, renderer) {
   balc.position.set(-4.5, 2.2, 0.4);
   scene.add(balc);
   const motes = dust(scene, [[-6.8, -6.8, 1.8, -0.2], [2.2, -6.2, 7.4, -0.3]]);
-  return { update(t) { living.update(t); kitchen.update(t); motes(t); } };
+  return { things: kitchen.things, update(t) { living.update(t); kitchen.update(t); motes(t); } };
 }
 
 function plant(scene, x, z) {

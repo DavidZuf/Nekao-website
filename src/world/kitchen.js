@@ -19,6 +19,7 @@ export const ARC = { x: 330, z: -3.5, base: -32 };
 export const KITCHEN_BLOCKERS = [
   [2.0, -7.0, 7.95, -6.22], // cabinets + oven tower
   [3.3, -1.98, 6.7, -0.82], // island
+  [3.68, -2.55, 4.12, -2.25], // Vera
   [4.38, -2.57, 4.82, -2.13], // stool 1
   [5.38, -2.57, 5.82, -2.13], // stool 2
   [7.38, -5.45, 7.95, -1.75], // window bench
@@ -162,8 +163,85 @@ export function buildKitchen(scene, renderer) {
   put(spout, 3.65, 0.92, -6.85);
   // cooktop + copper pot
   box([4.55, -6.85, 5.35, -6.4], 0.921, 0.926, M.darkGlass, { cast: false });
-  put(lathe([[0, 0], [0.13, 0], [0.135, 0.02], [0.135, 0.15], [0.14, 0.155], [0, 0.155]], M.copper), 4.95, 0.926, -6.62);
-  put(new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.008, 8, 20), M.copper), 4.95, 1.1, -6.62).rotation.x = Math.PI / 2;
+  // copper pot: the lid comes off (press E) and it boils over
+  const POT = { x: 4.95, y: 0.926, z: -6.62 };
+  put(lathe([[0, 0], [0.13, 0], [0.135, 0.02], [0.135, 0.15], [0.128, 0.15], [0.125, 0.03], [0, 0.03]], M.copper), POT.x, POT.y, POT.z);
+  const water = new THREE.Mesh(new THREE.CircleGeometry(0.126, 32), new THREE.MeshStandardMaterial({ color: '#cfd8dc', roughness: 0.15, envMap: env, envMapIntensity: 0.3 }));
+  water.rotation.x = -Math.PI / 2;
+  put(water, POT.x, POT.y + 0.12, POT.z, false);
+  const lid = new THREE.Group();
+  lid.add(lathe([[0, 0.012], [0.14, 0], [0.14, 0.008], [0.06, 0.022], [0, 0.026]], M.copper));
+  const knob = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.008, 8, 20), M.copper);
+  knob.position.y = 0.045;
+  lid.add(knob);
+  lid.traverse((o) => { o.castShadow = true; });
+  lid.position.set(POT.x, POT.y + 0.15, POT.z);
+  scene.add(lid);
+  // foam bubbles
+  const FOAM = 220;
+  const foam = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshStandardMaterial({ color: '#fbf8f2', roughness: 0.35, emissive: '#fff4e6', emissiveIntensity: 0.12 }), FOAM);
+  foam.frustumCulled = false;
+  foam.castShadow = true;
+  scene.add(foam);
+  const bub = Array.from({ length: FOAM }, (_, i) => ({ a: rnd() * Math.PI * 2, delay: 0.3 + (i / FOAM) * 9 + rnd() * 0.6, reach: 0.02 + Math.pow(rnd(), 0.7) * 0.34, size: 0.012 + rnd() * 0.02, ph: rnd() * 6.28 }));
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.125, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), foam.material);
+  dome.position.set(POT.x, POT.y + 0.14, POT.z);
+  dome.scale.setScalar(0.001);
+  scene.add(dome);
+  const steam = [];
+  for (let i = 0; i < 10; i++) {
+    const p = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: '#f1ece6', transparent: true, opacity: 0, depthWrite: false }));
+    p.userData.phase = i / 10;
+    scene.add(p);
+    steam.push(p);
+  }
+  const pot = { open: false, t0: 0, now: 0 };
+  const hide = new THREE.Matrix4().makeScale(0, 0, 0);
+  const tmpM = new THREE.Matrix4();
+  for (let i = 0; i < FOAM; i++) foam.setMatrixAt(i, hide);
+  const updatePot = (t) => {
+    pot.now = t;
+    const age = pot.open ? t - pot.t0 : -1;
+    // lid: lifts, slides to the side of the hob and settles tilted
+    const k = pot.open ? Math.min(1, age / 0.9) : 0;
+    const e = k * k * (3 - 2 * k);
+    lid.position.set(POT.x + e * 0.3, POT.y + 0.15 + Math.sin(e * Math.PI) * 0.14 - e * 0.143, POT.z + e * 0.06);
+    lid.rotation.z = -e * 0.0 + Math.sin(e * Math.PI) * 0.5;
+    // foam dome swells, bubbles pour over the rim and spread on the hob
+    dome.scale.setScalar(pot.open ? Math.max(0.001, Math.min(1, (age - 0.4) / 2.5)) * (1 + Math.sin(t * 9) * 0.03) : 0.001);
+    for (let i = 0; i < FOAM; i++) {
+      const b = bub[i];
+      const a = age - b.delay;
+      if (!pot.open || a < 0) { foam.setMatrixAt(i, hide); continue; }
+      const f = Math.min(1, a / 3.2), ease = 1 - Math.pow(1 - f, 2);
+      const r = 0.09 + ease * (0.05 + b.reach);
+      const over = Math.max(0, r - 0.136);
+      const y = over <= 0 ? POT.y + 0.15 + Math.sin(b.ph) * 0.02 : Math.max(POT.y + 0.004 + b.size * 0.6, POT.y + 0.15 - over * 3.2);
+      const wob = 1 + Math.sin(t * 7 + b.ph) * 0.12;
+      const sz = b.size * Math.min(1, a * 3) * wob;
+      // keep the spill on the counter (flatten against the backsplash)
+      const z = Math.min(POT.z + 0.31, Math.max(POT.z - 0.26, POT.z + Math.sin(b.a) * r)); // stay on the counter
+      tmpM.makeScale(sz, sz * (over > 0.05 ? 0.7 : 1), sz).setPosition(POT.x + Math.cos(b.a) * r * 1.5, y, z);
+      foam.setMatrixAt(i, tmpM);
+    }
+    foam.instanceMatrix.needsUpdate = true;
+    steam.forEach((p) => {
+      const f = (t * 0.35 + p.userData.phase) % 1;
+      p.position.set(POT.x + Math.sin(f * 6 + p.userData.phase * 9) * 0.05, POT.y + 0.2 + f * 0.6, POT.z + Math.cos(f * 5) * 0.03);
+      const sc = 0.06 + f * 0.22;
+      p.scale.set(sc, sc * 1.2, 1);
+      p.material.opacity = pot.open ? Math.sin(f * Math.PI) * 0.3 * Math.min(1, age) : 0;
+    });
+  };
+  const things = [{
+    id: 'pot', pos: [POT.x, POT.z], reach: 1.5,
+    label: () => (pot.open ? 'Put the lid back. Quick.' : 'Open the pot?'),
+    use: () => {
+      pot.open = !pot.open;
+      pot.t0 = pot.now;
+      return pot.open ? 'You had to open it. It\'s boiling over. Everywhere.' : 'Lid back on. We never speak of this.';
+    }
+  }];
   // calla lilies in a black vase
   const vaseBlack = new THREE.MeshPhysicalMaterial({ color: '#050405', roughness: 0.15, clearcoat: 1, envMap: env, envMapIntensity: 0.25 });
   put(lathe([[0, 0], [0.07, 0], [0.11, 0.1], [0.08, 0.24], [0.05, 0.3], [0.055, 0.32]], vaseBlack), 2.55, 0.92, -6.6);
@@ -318,8 +396,7 @@ export function buildKitchen(scene, renderer) {
   put(new THREE.Mesh(new THREE.SphereGeometry(0.13, 40, 28), M.copper), 7.3, 1.98, -0.24);
   // trailing plant on top
   const leaf = new THREE.MeshStandardMaterial({ color: '#3b5a25', roughness: 0.9 });
-  const pot = put(lathe([[0, 0], [0.08, 0], [0.1, 0.14], [0, 0.14]], M.black), 7.7, 2.35, -0.25);
-  pot.castShadow = true;
+  put(lathe([[0, 0], [0.08, 0], [0.1, 0.14], [0, 0.14]], M.black), 7.7, 2.35, -0.25);
   for (let i = 0; i < 9; i++) {
     const pts = [];
     const a = (i / 9) * Math.PI * 2;
@@ -357,7 +434,9 @@ export function buildKitchen(scene, renderer) {
   const traffic = buildArcView(scene);
 
   return {
+    things,
     update(t) {
+      updatePot(t);
       ember.material.opacity = 0.75 + Math.sin(t * 4.7) * 0.15 + Math.sin(t * 1.7) * 0.1;
       puffs.forEach((p) => {
         const f = (t * 0.17 + p.userData.phase) % 1;

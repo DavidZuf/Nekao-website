@@ -190,7 +190,14 @@ const World = forwardRef(function World({ active, onRoom, onNearby }, ref) {
           const d = tmp.length();
           if (d < (m.data.reach ?? TALK_DISTANCE) && d < best && tmp.normalize().dot(look.setY(0).normalize()) > 0.65) { best = d; near = m.data; }
         });
-        if ((near && near.id) !== (lastNear && lastNear.id)) { lastNear = near; onNearby?.(near); }
+        // objects you can use (the pot…)
+        (living.things || []).forEach((th) => {
+          tmp.set(th.pos[0] - player.x, 0, th.pos[1] - player.z);
+          const d = tmp.length();
+          if (d < th.reach && d < best && tmp.normalize().dot(look) > 0.6) { best = d; near = { thing: true, id: th.id, label: th.label() }; }
+        });
+        const key = (n) => (n ? n.id + (n.label || '') : '');
+        if (key(near) !== key(lastNear)) { lastNear = near; onNearby?.(near); }
       }
 
       if (mode === 'cinematic' && shot) {
@@ -268,6 +275,7 @@ const World = forwardRef(function World({ active, onRoom, onNearby }, ref) {
           camera.position.copy(shot.fromPos);
         });
       },
+      use(id) { const th = (living.things || []).find((x) => x.id === id); return th ? th.use() : null; },
       press(k, on) { if (on) keys.add(k); else keys.delete(k); }
     };
     if (import.meta.env.DEV || window.__NEKAO_DEBUG) window.__nekao = { api: api.current, clock, camera, player };
@@ -289,6 +297,7 @@ const World = forwardRef(function World({ active, onRoom, onNearby }, ref) {
     talkTo: (id) => api.current.talkTo?.(id),
     endTalk: () => api.current.endTalk?.(),
     press: (k, on) => api.current.press?.(k, on),
+    use: (id) => api.current.use?.(id),
     currentRoom: () => api.current.currentRoom?.()
   }));
 
