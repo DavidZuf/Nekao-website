@@ -455,3 +455,12 @@ kbd {
   .pdp-shot { flex: 0 0 82%; scroll-snap-align: center; }
   .tag-card { position: static; }
 }
+
+/* ---------- apartment interface, serif ---------- */
+.controls-help { font-family: var(--display); font-style: italic; font-size: 18px; color: var(--cream); background: rgba(8,4,6,0.6); backdrop-filter: blur(6px); }
+.controls-help .link { font-family: var(--body); font-style: normal; font-size: 12px; letter-spacing: 0.12em; }
+.map-btn { font-family: var(--display); font-style: italic; font-size: 19px; letter-spacing: 0.01em; text-transform: none; padding: 0 22px; backdrop-filter: blur(6px); }
+.prompt { font-family: var(--display); font-style: italic; font-size: 19px; padding: 0 24px; }
+.choices button { font-family: var(--display); font-style: italic; font-size: 18px; padding: 0 20px; }
+.skip-hint { font-family: var(--display); font-style: italic; font-size: 15px; letter-spacing: 0.02em; text-transform: none; }
+.map-note { font-family: var(--display); font-style: italic; font-size: 17px; letter-spacing: 0; text-transform: none; }

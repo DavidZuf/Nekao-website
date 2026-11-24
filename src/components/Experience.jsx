@@ -77,14 +77,14 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
 
   return (
     <main className="experience">
-      <World ref={world} active={phase === 'roam' || phase === 'talk'} onRoom={onRoom} onNearby={setNearby} />
+      <World ref={world} active={phase === 'roam' || phase === 'talk'} onRoom={onRoom} onNearby={setNearby} onPick={(m) => phase === 'roam' && !drawerOpen && talk(m)} />
 
       {phase === 'roam' && (
         <>
           {nearby && (
             <div className="prompt-row">
               <button type="button" className="prompt" onClick={() => act(nearby)}>
-                <kbd>E</kbd> {nearby.thing ? nearby.label : `Talk to ${nearby.name}`}
+                {nearby.thing ? nearby.label : `Talk to ${nearby.name}`}
               </button>
               {!nearby.thing && (
                 <button type="button" className="prompt prompt--shop" onClick={() => onShowTee(nearby.product)}>
@@ -94,14 +94,11 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
             </div>
           )}
 
-          <button type="button" className="map-btn" onClick={() => setMapOpen(true)}>
-            <kbd>M</kbd> Map · fast travel
-          </button>
+          <button type="button" className="map-btn" onClick={() => setMapOpen(true)}>Rooms</button>
 
           {help && (
             <div className="controls-help">
-              <div><kbd>↑</kbd><kbd>↓</kbd> walk · <kbd>←</kbd><kbd>→</kbd> turn · <kbd>A</kbd><kbd>D</kbd> step aside</div>
-              <div>Drag to look · <kbd>Shift</kbd> run · <kbd>E</kbd> talk · <kbd>M</kbd> map</div>
+              <div>Arrows to walk · drag to look · click someone to meet them</div>
               <button type="button" className="link" onClick={() => setHelp(false)}>Got it</button>
             </div>
           )}
@@ -120,7 +117,7 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
       {mapOpen && (
         <div className="map" role="dialog" aria-label="Floor plan">
           <div className="map-head">
-            <h2>Fast travel</h2>
+            <h2>Rooms</h2>
             <button type="button" className="close close--light" onClick={() => setMapOpen(false)} aria-label="Close">×</button>
           </div>
           <div className="map-plan">

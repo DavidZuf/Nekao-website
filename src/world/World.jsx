@@ -47,7 +47,7 @@ const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // (with the models frozen inside it) replaces buildApartment + buildModel.
 // `preview` = [x, z, yaw]: a fixed, gently swaying view with no controls
 // (the peephole on the homepage).
-const World = forwardRef(function World({ active, preview, onRoom, onNearby }, ref) {
+const World = forwardRef(function World({ active, preview, onRoom, onNearby, onPick }, ref) {
   const mount = useRef(null);
   const api = useRef({});
   const activeRef = useRef(active);
@@ -110,8 +110,8 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby }, r
     };
     placeCamera();
 
-    // keyboard
-    const map = { ArrowUp: 'f', KeyW: 'f', ArrowDown: 'b', KeyS: 'b', ArrowLeft: 'tl', ArrowRight: 'tr', KeyA: 'sl', KeyD: 'sr', ShiftLeft: 'run', ShiftRight: 'run' };
+    // keyboard: arrows (or WASD) walk and turn. That's all.
+    const map = { ArrowUp: 'f', KeyW: 'f', ArrowDown: 'b', KeyS: 'b', ArrowLeft: 'tl', KeyA: 'tl', ArrowRight: 'tr', KeyD: 'tr' };
     const onDown = (e) => {
       if (!activeRef.current || mode !== 'roam') return;
       if (document.querySelector('[role="dialog"]')) return;
@@ -122,16 +122,38 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby }, r
     window.addEventListener('keyup', onUp);
 
     // mouse / touch drag to look
+    // a click that didn't drag = pick whoever is under the cursor
     let drag = null;
+    let travelled = 0;
     const cvs = renderer.domElement;
-    const pd = (e) => { if (mode === 'roam') drag = { x: e.clientX, y: e.clientY }; };
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    const personAt = (e) => {
+      const r = cvs.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      ray.far = 9;
+      const hit = ray.intersectObjects(models.map((m) => m.group), true)[0];
+      return hit && models.find((m) => { let o = hit.object; while (o) { if (o === m.group) return true; o = o.parent; } return false; });
+    };
+    const pd = (e) => { if (mode === 'roam') { drag = { x: e.clientX, y: e.clientY }; travelled = 0; } };
     const pm = (e) => {
-      if (!drag) return;
+      if (!drag) {
+        if (mode === 'roam' && e.target === cvs && !previewRef.current) cvs.style.cursor = personAt(e) ? 'pointer' : '';
+        return;
+      }
+      travelled += Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y);
       player.yaw -= (e.clientX - drag.x) * 0.004;
       player.pitch = THREE.MathUtils.clamp(player.pitch - (e.clientY - drag.y) * 0.003, -0.6, 0.5);
       drag = { x: e.clientX, y: e.clientY };
     };
-    const pu = () => { drag = null; };
+    const pu = (e) => {
+      if (drag && travelled < 6 && mode === 'roam' && e.target === cvs) {
+        const m = personAt(e);
+        if (m) onPick?.(m.data);
+      }
+      drag = null;
+    };
     cvs.addEventListener('pointerdown', pd);
     window.addEventListener('pointermove', pm);
     window.addEventListener('pointerup', pu);
@@ -171,7 +193,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby }, r
 
       if (mode === 'roam' && !pv) {
         // eased movement: speed builds up and settles instead of snapping
-        const run = keys.has('run') ? 1.8 : 1;
+        const run = 1;
         const k = 1 - Math.exp(-dt * 9);
         vel.t += (((keys.has('tl') ? 1 : 0) - (keys.has('tr') ? 1 : 0)) - vel.t) * k;
         vel.f += (((keys.has('f') ? 1 : 0) - (keys.has('b') ? 1 : 0)) * run - vel.f) * k;

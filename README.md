@@ -25,18 +25,12 @@ Netlify call it a rewrite) so links like `/shop/tee-cream` work.
 
 ## Controls
 
-| Key | Action |
+| Do | How |
 | --- | --- |
-| ↑ ↓ (or W S) | Walk forward / back |
-| ← → | Turn |
-| A D | Step sideways |
-| Drag mouse | Look around |
-| Shift | Run |
-| E | Talk to the model in front of you |
-| Enter / click | Next line in a conversation |
-| 1 2 3 | Choose: shop the look / tell me about it / later |
-| M | Map → jump to another room |
-| Esc | Leave a conversation |
+| Walk / turn | Arrow keys (or W A S D) |
+| Look around | Drag the mouse |
+| Meet someone | Click them, or walk up and hit Talk / Shop the look |
+| Change room | Rooms button |
 
 On phones: on-screen arrows + drag to look, tap the "Talk" button.
 

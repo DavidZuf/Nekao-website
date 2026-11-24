@@ -44,7 +44,6 @@ export default function Cutscene({ model, product, ready, onShowTee, onClose }) 
     const onKey = (e) => {
       if (document.querySelector('[role="dialog"]')) return;
       if (e.key === 'Escape') onClose();
-      else if (ready && ['1', '2', '3'].includes(e.key)) choose(Number(e.key));
       else if (['Enter', ' ', 'e', 'E'].includes(e.key)) { e.preventDefault(); advance(); }
     };
     window.addEventListener('keydown', onKey);
@@ -72,11 +71,11 @@ export default function Cutscene({ model, product, ready, onShowTee, onClose }) 
           <div className="speaker">{model.name}</div>
           {!(model.cutscene && !extra) && <p>{typed}<span className="caret" /></p>}
           <div className="choices" onClick={(e) => e.stopPropagation()}>
-            <button type="button" onClick={() => choose(1)}><kbd>1</kbd> Shop the look</button>
-            <button type="button" onClick={() => choose(2)}><kbd>2</kbd> Tell me about it</button>
-            <button type="button" onClick={() => choose(3)}><kbd>3</kbd> Later</button>
+            <button type="button" onClick={() => choose(1)}>Shop the look</button>
+            <button type="button" onClick={() => choose(2)}>Tell me about it</button>
+            <button type="button" onClick={() => choose(3)}>Later</button>
           </div>
-          {!finished && <div className="skip-hint">Enter / click for more · Esc to leave</div>}
+          {!finished && <div className="skip-hint">click for more</div>}
         </div>
       )}
     </div>
