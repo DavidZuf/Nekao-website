@@ -31,17 +31,17 @@ export const PRODUCTS = {
   },
   'tee-soleil': {
     id: 'tee-soleil',
-    name: '[Tee name] — Vogue Paris × Jacquemus',
+    name: '[Tee name] — Soleil',
     color: 'White, martini & sun print',
     swatch: '#f4efe6',
     logo: 'dark',
     price: '[PRICE]',
     details: '[Fabric, weight and fit.] Daisy wears it boxy, tucked into wide trousers, over a sheer long sleeve.'
   },
-  'tee-vogue-kith': {
-    id: 'tee-vogue-kith',
-    name: '[Tee name] — Vogue ♥ Kith',
-    color: 'White, striped logo print',
+  'tee-stripe': {
+    id: 'tee-stripe',
+    name: '[Tee name] — Stripe',
+    color: 'White, striped print',
     swatch: '#f4efe6',
     logo: 'dark',
     price: '[PRICE]',
@@ -60,32 +60,20 @@ export const PRODUCTS = {
 
 export const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
-// ---------------------------------------------------------------
-// THE TOUR — one continuous flight (FPV drone / gimbal), no cuts.
-// The site plays the flight and PAUSES at each room's `stop` (seconds
-// into the video). Models are frozen, so the paused frame looks alive.
-//
-// Swap public/tour/flight.mp4 for your real flight, then set the stops.
-// x / y = where each model's tag sits, in % of the video frame.
-// ---------------------------------------------------------------
-export const FLIGHT = {
-  src: './tour/flight.mp4',
-  poster: './tour/flight.jpg'
-};
-
-// Rooms: rectangles on the floor plan (metres). `stop` = when the flight
-// video reaches this room. `spawn` = where you land after fast travel
-// [x, z, yaw]. In the real version the 3D apartment comes from a scan.
+// Rooms: rectangles on the floor plan (metres). `spawn` = where you land
+// after fast travel [x, z, yaw]. In the real version the 3D apartment
+// comes from a scan.
 export const ROOMS = [
-  { id: 'hall', name: 'Entrance hall', stop: 2.4, rect: [-2, 0, 2, 4], spawn: [0, 3.3, 0] },
-  { id: 'living', name: 'Living room', stop: 6.4, rect: [-7, -7, 2, 0], spawn: [-2.5, -0.6, 0] },
-  { id: 'kitchen', name: 'Kitchen', stop: 10.4, rect: [2, -7, 8, 0], spawn: [2.8, -3.3, -Math.PI / 2] },
-  { id: 'bedroom', name: 'Bedroom', stop: 14.5, rect: [2, 0, 8, 6], spawn: [2.8, 2, -Math.PI / 2] },
-  { id: 'balcony', name: 'Balcony', stop: 18.5, rect: [-7, 0, -2, 3], spawn: [-4.5, 0.5, Math.PI], outdoor: true }
+  { id: 'hall', name: 'Entrance hall', rect: [-2, 0, 2, 4], spawn: [0, 3.3, 0] },
+  { id: 'living', name: 'Living room', rect: [-7, -7, 2, 0], spawn: [-2.5, -0.6, 0] },
+  { id: 'kitchen', name: 'Kitchen', rect: [2, -7, 8, 0], spawn: [2.8, -3.3, -Math.PI / 2] },
+  { id: 'bedroom', name: 'Bedroom', rect: [2, 0, 8, 6], spawn: [2.8, 2, -Math.PI / 2] },
+  { id: 'balcony', name: 'Balcony', rect: [-7, 0, -2, 3], spawn: [-4.5, 0.5, Math.PI], outdoor: true }
 ];
 
 // The residents: models standing in the apartment wearing NEKAO.
 // Names and lines are placeholders — write the real ones with the models.
+// Keep it to two short lines each: people came to see the tee.
 // pos = [x, z] on the floor plan, face = direction they look (radians).
 // cutscene = optional video of the model talking (plays instead of the
 // in-engine scene), e.g. '/cutscenes/ines.mp4'.
@@ -95,41 +83,37 @@ export const MODELS = [
     product: 'tee-cream', skin: '#c9a387', hair: '#2a1d14',
     lines: [
       'Oh, hey. You just walked in like you live here.',
-      'Relax, everyone does. That\'s kind of the point of this place.',
       'This one? Cream. I wear it every time I get home.'
     ]
   },
   {
     id: 'daisy', name: 'Daisy', room: 'living', pos: [-3.95, -3.7], face: 0.4,
     // standing cut-out of the illustration (1.8 m tall), feet on the floor
-    cutout: { src: './daisy.png', w: 619, h: 1526, scale: 1.8 / 1526, anchor: [446, 1526], tip: [23, 250] },
+    cutout: { src: '/daisy.png', w: 619, h: 1526, scale: 1.8 / 1526, anchor: [446, 1526], tip: [23, 250] },
     product: 'tee-soleil',
     lines: [
       'Darling, you\'re standing in my light.',
-      'Kidding. Stay. Just not on the pink side of the sofa, that one\'s mine.',
       'The tee? NEKAO, obviously. The only sun I let near me after midnight.'
     ]
   },
   {
     id: 'gigi', name: '[Gigi]', room: 'living', pos: [-1.75, -5.05], face: 0, eye: 1.12, reach: 3.1,
     // sitting cut-out on the pink sofa: seat contact at the sofa's seat height
-    cutout: { src: './gigi.png', w: 925, h: 1277, scale: 0.44 / 388, anchor: [401, 889], anchorY: 0.44, tip: [274, 314], turn: 0.45, shadow: [0.45, 0.12, 0.28] },
-    product: 'tee-vogue-kith',
+    cutout: { src: '/gigi.png', w: 925, h: 1277, scale: 0.44 / 388, anchor: [401, 889], anchorY: 0.44, tip: [274, 314], turn: 0.45, shadow: [0.45, 0.12, 0.28] },
+    product: 'tee-stripe',
     lines: [
       'Mm. You found the good sofa.',
-      'Don\'t sit too close, I just got comfortable.',
-      'This one\'s the Vogue and Kith tee. Wear it with boots, never with sneakers. Trust me.'
+      'Wear this one with boots, never with sneakers. Trust me.'
     ]
   },
   {
     id: 'vera', name: '[Vera]', room: 'kitchen', pos: [3.9, -2.4], face: Math.PI,
     // standing cut-out (1.8 m tall), in front of the island counter
-    cutout: { src: './vera.png', w: 465, h: 1379, scale: 1.8 / 1379, anchor: [130, 1379] },
-    product: 'tee-vogue-kith',
+    cutout: { src: '/vera.png', w: 465, h: 1379, scale: 1.8 / 1379, anchor: [130, 1379] },
+    product: 'tee-stripe',
     lines: [
       'You\'re just in time. I opened the good bottle.',
-      'Glasses are on the island. Don\'t touch the ashtray, that one\'s not mine.',
-      'The tee? Vogue and Kith. It goes with red wine and bad decisions.'
+      'This tee goes with red wine and bad decisions.'
     ]
   },
   {
@@ -149,3 +133,7 @@ export const MODELS = [
     ]
   }
 ];
+
+// Who wears a product, and in which room (for "seen in" labels and links).
+export const wornBy = (productId) =>
+  MODELS.filter((m) => m.product === productId).map((m) => ({ model: m, room: ROOMS.find((r) => r.id === m.room) }));

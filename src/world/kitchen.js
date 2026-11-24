@@ -373,7 +373,7 @@ export function buildKitchen(scene, renderer) {
     box([sx0 + 0.05, sz0 + 0.01, sx1 - 0.05, sz0 + 0.025], y - 0.012, y - 0.004, warmLED, { cast: false });
   });
   // shelf 1 (on the marble counter): NEKAO logo sculpture
-  const logoTex = new THREE.TextureLoader().load('./logo_cream.png');
+  const logoTex = new THREE.TextureLoader().load('/logo_cream.png');
   logoTex.colorSpace = THREE.SRGBColorSpace;
   box([7.05, -0.32, 7.35, -0.16], 0.93, 1.03, new THREE.MeshStandardMaterial({ color: '#e8e2de', roughness: 0.3 }));
   const sculptMat = new THREE.MeshStandardMaterial({ map: logoTex, color: '#efe7e2', roughness: 0.35, metalness: 0.2, alphaTest: 0.5, side: THREE.DoubleSide, envMap: env, envMapIntensity: 0.2 });

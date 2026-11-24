@@ -84,7 +84,7 @@ const World = forwardRef(function World({ active, onRoom, onNearby }, ref) {
     const loader = new THREE.TextureLoader();
     const models = MODELS.map((m) => {
       const p = PRODUCTS[m.product];
-      const group = m.cutout ? buildCutout(m.cutout) : m.kind === 'daisy3d' ? buildDaisy() : buildModel({ ...m, tee: p.swatch, logo: loader.load(p.logo === 'dark' ? './logo_dark.png' : './logo_cream.png') });
+      const group = m.cutout ? buildCutout(m.cutout) : m.kind === 'daisy3d' ? buildDaisy() : buildModel({ ...m, tee: p.swatch, logo: loader.load(p.logo === 'dark' ? '/logo_dark.png' : '/logo_cream.png') });
       group.position.set(m.pos[0], 0, m.pos[1]);
       group.rotation.y = m.face;
       scene.add(group);

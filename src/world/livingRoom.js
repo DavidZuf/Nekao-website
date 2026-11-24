@@ -181,7 +181,7 @@ export function buildLivingRoom(scene, wallMat) {
   // ---------- NEKAO logo sculpture ----------
   add(scene, new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.95, 0.9), plaster), 0.9, 0.475, -5.4);
   add(scene, new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 0.08, 40), new THREE.MeshStandardMaterial({ color: '#e2c3ad', roughness: 0.5 })), 0.9, 0.99, -5.4);
-  const logoTex = new THREE.TextureLoader().load('./logo_cream.png');
+  const logoTex = new THREE.TextureLoader().load('/logo_cream.png');
   logoTex.colorSpace = THREE.SRGBColorSpace;
   const sculptMat = new THREE.MeshStandardMaterial({ map: logoTex, color: '#f3dcc8', roughness: 0.45, alphaTest: 0.5, side: THREE.DoubleSide });
   const sculptDepth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: logoTex, alphaTest: 0.5 });

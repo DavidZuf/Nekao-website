@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import World from '../world/World.jsx';
-import FlightPlayer from './FlightPlayer.jsx';
 import Cutscene from './Cutscene.jsx';
 import { ROOMS, PRODUCTS } from '../data.js';
 
 // Puts it all together:
-//  intro  → the continuous flight plays from the door to the hall
 //  roam   → you walk around in 3D (arrows / WASD, drag to look)
 //  talk   → cinematic with a model (press E when close)
-//  travel → fast travel: the flight takes you to another room
-export default function Experience({ onRoom, onShowTee, drawerOpen }) {
+//  travel → fast travel: a quick fade to another room
+export default function Experience({ startRoom = 'hall', onRoom, onShowTee, drawerOpen }) {
   const world = useRef(null);
-  const [phase, setPhase] = useState('intro');
-  const [travel, setTravel] = useState({ from: 0, to: ROOMS[0].stop, room: ROOMS[0], label: 'Apt. 01' });
+  const [phase, setPhase] = useState('roam');
+  const [fade, setFade] = useState(false);
   const [nearby, setNearby] = useState(null);
   const [talking, setTalking] = useState(null);
   const [talkReady, setTalkReady] = useState(false);
@@ -27,19 +25,20 @@ export default function Experience({ onRoom, onShowTee, drawerOpen }) {
     } else talk(n);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const arrive = useCallback(() => {
-    world.current?.teleport(travel.room.id);
-    setPhase('roam');
-  }, [travel]);
+  // land in the room from the URL (/apartment/kitchen), the hall by default
+  useEffect(() => { world.current?.teleport(startRoom); }, [startRoom]);
 
   const fastTravel = useCallback((room) => {
     setMapOpen(false);
-    const here = world.current?.currentRoom();
-    if (here?.id === room.id) return;
-    // fly forward from where you are; going backwards replays the last stretch
-    const from = here && here.stop < room.stop ? here.stop : Math.max(0, room.stop - 4);
-    setTravel({ from, to: room.stop, room, label: `→ ${room.name}` });
+    if (world.current?.currentRoom()?.id === room.id) return;
     setPhase('travel');
+    setFade(true);
+    setTimeout(() => {
+      world.current?.teleport(room.id);
+      window.history.replaceState({}, '', `/apartment/${room.id}`);
+      setFade(false);
+      setPhase('roam');
+    }, 450);
   }, []);
 
   const talk = useCallback(async (model) => {
@@ -83,9 +82,16 @@ export default function Experience({ onRoom, onShowTee, drawerOpen }) {
       {phase === 'roam' && (
         <>
           {nearby && (
-            <button type="button" className="prompt" onClick={() => act(nearby)}>
-              <kbd>E</kbd> {nearby.thing ? nearby.label : `Talk to ${nearby.name}`}
-            </button>
+            <div className="prompt-row">
+              <button type="button" className="prompt" onClick={() => act(nearby)}>
+                <kbd>E</kbd> {nearby.thing ? nearby.label : `Talk to ${nearby.name}`}
+              </button>
+              {!nearby.thing && (
+                <button type="button" className="prompt prompt--shop" onClick={() => onShowTee(nearby.product)}>
+                  Shop the look · {PRODUCTS[nearby.product].price}
+                </button>
+              )}
+            </div>
           )}
 
           <button type="button" className="map-btn" onClick={() => setMapOpen(true)}>
@@ -133,13 +139,11 @@ export default function Experience({ onRoom, onShowTee, drawerOpen }) {
               );
             })}
           </div>
-          <p className="map-note">Pick a room: the drone flies you there.</p>
+          <p className="map-note">Pick a room to go there.</p>
         </div>
       )}
 
-      {(phase === 'intro' || phase === 'travel') && (
-        <FlightPlayer from={travel.from} to={travel.to} label={travel.label} onDone={arrive} />
-      )}
+      <div className={`travel-fade ${fade ? 'is-on' : ''}`} />
 
       {phase === 'talk' && talking && (
         <Cutscene

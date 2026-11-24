@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { SIZES } from '../data.js';
+import { Link } from '../router.jsx';
+import TeeVisual from './TeeVisual.jsx';
 
+// Quick view used inside the apartment, so you can buy without leaving.
 export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
   const [size, setSize] = useState('M');
   const [added, setAdded] = useState(false);
@@ -13,7 +16,6 @@ export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
   }, [onClose]);
 
   if (!product) return null;
-  const logo = product.logo === 'dark' ? './logo_dark.png' : './logo_cream.png';
 
   return (
     <>
@@ -24,10 +26,7 @@ export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
           <button type="button" className="close" onClick={onClose} aria-label="Close">×</button>
         </div>
         <div className="product-visual" style={{ background: product.swatch === '#141412' ? '#1f1f1c' : '#141412' }}>
-          <svg width="220" height="200" viewBox="0 0 200 180" aria-hidden="true">
-            <path d="M50 20 L150 20 L190 60 L162 84 L148 70 L148 170 L52 170 L52 70 L38 84 L10 60 Z" fill={product.swatch} stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
-          </svg>
-          <img src={logo} alt="" className="product-logo" />
+          <TeeVisual product={product} size={220} />
           <span className="photo-note">[Swap for product photo]</span>
         </div>
         <h2>{product.name}</h2>
@@ -48,6 +47,7 @@ export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
           {added ? 'Added ✓ — add another' : 'Add to bag'}
         </button>
         <p className="details">{product.details}</p>
+        <Link to={`/shop/${product.id}`} className="link link--dark" onClick={onClose}>Full details, size guide & shipping →</Link>
       </aside>
     </>
   );

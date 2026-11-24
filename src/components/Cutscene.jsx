@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-// GTA-style cinematic: black bars, name, typed-out subtitles, then choices.
+// GTA-style cinematic: black bars, name, typed-out subtitles. The choices
+// show from the start, so you can shop the look without reading every line.
 // If the model has a `cutscene` video, it plays instead of the subtitles.
 export default function Cutscene({ model, product, ready, onShowTee, onClose }) {
   const [line, setLine] = useState(0);
@@ -43,7 +44,7 @@ export default function Cutscene({ model, product, ready, onShowTee, onClose }) 
     const onKey = (e) => {
       if (document.querySelector('[role="dialog"]')) return;
       if (e.key === 'Escape') onClose();
-      else if (finished && ['1', '2', '3'].includes(e.key)) choose(Number(e.key));
+      else if (ready && ['1', '2', '3'].includes(e.key)) choose(Number(e.key));
       else if (['Enter', ' ', 'e', 'E'].includes(e.key)) { e.preventDefault(); advance(); }
     };
     window.addEventListener('keydown', onKey);
@@ -70,14 +71,12 @@ export default function Cutscene({ model, product, ready, onShowTee, onClose }) 
         <div className="subtitle">
           <div className="speaker">{model.name}</div>
           {!(model.cutscene && !extra) && <p>{typed}<span className="caret" /></p>}
-          {finished && (
-            <div className="choices" onClick={(e) => e.stopPropagation()}>
-              <button type="button" onClick={() => choose(1)}><kbd>1</kbd> Show me the tee</button>
-              <button type="button" onClick={() => choose(2)}><kbd>2</kbd> Tell me about it</button>
-              <button type="button" onClick={() => choose(3)}><kbd>3</kbd> Later</button>
-            </div>
-          )}
-          {!finished && <div className="skip-hint">Enter / click to continue · Esc to leave</div>}
+          <div className="choices" onClick={(e) => e.stopPropagation()}>
+            <button type="button" onClick={() => choose(1)}><kbd>1</kbd> Shop the look</button>
+            <button type="button" onClick={() => choose(2)}><kbd>2</kbd> Tell me about it</button>
+            <button type="button" onClick={() => choose(3)}><kbd>3</kbd> Later</button>
+          </div>
+          {!finished && <div className="skip-hint">Enter / click for more · Esc to leave</div>}
         </div>
       )}
     </div>
