@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import World from '../world/World.jsx';
 import Cutscene from './Cutscene.jsx';
 import { ROOMS, PRODUCTS } from '../data.js';
+import { takeFrame } from '../handoff.js';
 
 // Puts it all together:
 //  roam   → you walk around in 3D (arrows / WASD, drag to look)
@@ -11,6 +12,8 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
   const world = useRef(null);
   const [phase, setPhase] = useState('roam');
   const [fade, setFade] = useState(false);
+  const [still] = useState(takeFrame); // last peephole frame, if we came from there
+  const [ready, setReady] = useState(false);
   const [nearby, setNearby] = useState(null);
   const [talking, setTalking] = useState(null);
   const [talkReady, setTalkReady] = useState(false);
@@ -26,7 +29,14 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // land in the room from the URL (/apartment/kitchen), the hall by default
-  useEffect(() => { world.current?.teleport(startRoom); }, [startRoom]);
+  // coming through the peephole: start exactly where it was looking
+  useEffect(() => {
+    let peek = null;
+    try { peek = JSON.parse(sessionStorage.getItem('nekao-peek') || 'null'); } catch { /* ignore */ }
+    // (it expires on its own after a few seconds, so a reload starts normally)
+    if (peek && Date.now() - peek.at < 4000) world.current?.place(peek);
+    else world.current?.teleport(startRoom);
+  }, [startRoom]);
 
   const fastTravel = useCallback((room) => {
     setMapOpen(false);
@@ -77,7 +87,8 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
 
   return (
     <main className="experience">
-      <World ref={world} active={phase === 'roam' || phase === 'talk'} onRoom={onRoom} onNearby={setNearby} onPick={(m) => phase === 'roam' && !drawerOpen && talk(m)} />
+      <World ref={world} active={phase === 'roam' || phase === 'talk'} onRoom={onRoom} onNearby={setNearby} onPick={(m) => phase === 'roam' && !drawerOpen && talk(m)} onReady={() => setReady(true)} />
+      {still && <img className={`handoff ${ready ? 'is-gone' : ''}`} src={still} alt="" />}
 
       {phase === 'roam' && (
         <>

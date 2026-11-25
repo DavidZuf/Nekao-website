@@ -47,7 +47,7 @@ const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // (with the models frozen inside it) replaces buildApartment + buildModel.
 // `preview` = [x, z, yaw]: a fixed, gently swaying view with no controls
 // (the peephole on the homepage).
-const World = forwardRef(function World({ active, preview, onRoom, onNearby, onPick }, ref) {
+const World = forwardRef(function World({ active, preview, onRoom, onNearby, onPick, onReady }, ref) {
   const mount = useRef(null);
   const api = useRef({});
   const activeRef = useRef(active);
@@ -125,6 +125,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     // a click that didn't drag = pick whoever is under the cursor
     let drag = null;
     let travelled = 0;
+    const peek = { yaw: 0, pitch: 0 };
     const cvs = renderer.domElement;
     const ray = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
@@ -143,8 +144,14 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
         return;
       }
       travelled += Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y);
-      player.yaw -= (e.clientX - drag.x) * 0.004;
-      player.pitch = THREE.MathUtils.clamp(player.pitch - (e.clientY - drag.y) * 0.003, -0.6, 0.5);
+      if (previewRef.current) {
+        // through the peephole: look around a little, you can't walk
+        peek.yaw = THREE.MathUtils.clamp(peek.yaw - (e.clientX - drag.x) * 0.004, -0.9, 0.9);
+        peek.pitch = THREE.MathUtils.clamp(peek.pitch - (e.clientY - drag.y) * 0.003, -0.35, 0.35);
+      } else {
+        player.yaw -= (e.clientX - drag.x) * 0.004;
+        player.pitch = THREE.MathUtils.clamp(player.pitch - (e.clientY - drag.y) * 0.003, -0.6, 0.5);
+      }
       drag = { x: e.clientX, y: e.clientY };
     };
     const pu = (e) => {
@@ -169,6 +176,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     // ----- loop -----
     const clock = new THREE.Clock();
     let raf;
+    let frames = 0;
     const tmp = new THREE.Vector3();
     const look = new THREE.Vector3();
 
@@ -191,8 +199,8 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
         const tall = camera.aspect < 0.8;
         const fov = tall ? 84 : 62;
         if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
-        player.yaw = pv[2] + Math.sin(t * 0.25) * 0.07;
-        player.pitch = (tall ? -0.3 : -0.04) + Math.sin(t * 0.17) * 0.015;
+        player.yaw = pv[2] + peek.yaw + Math.sin(t * 0.25) * 0.07;
+        player.pitch = (tall ? -0.3 : -0.04) + peek.pitch + Math.sin(t * 0.17) * 0.015;
         placeCamera();
       } else if (!activeRef.current) return;
 
@@ -253,6 +261,8 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
       living.update(t);
       grade.uniforms.time.value = t % 100;
       composer.render();
+      frames += 1;
+      if (frames === 4) onReady?.();
     };
     tick();
 
@@ -274,6 +284,15 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
         onRoom?.(r);
       },
       currentRoom: () => roomAt(player.x, player.z),
+      pose: () => ({ x: player.x, z: player.z, yaw: player.yaw, pitch: player.pitch }),
+      snapshot() { composer.render(); return renderer.domElement.toDataURL('image/jpeg', 0.9); },
+      place({ x, z, yaw, pitch = 0 }) {
+        Object.assign(player, { x, z, yaw, pitch });
+        keys.clear();
+        placeCamera();
+        const r = roomAt(x, z);
+        if (r) { lastRoom = r.id; onRoom?.(r); }
+      },
       // Cinematic: camera glides to a two-shot of the model, who turns to you.
       talkTo(modelId) {
         const m = models.find((x) => x.data.id === modelId);
@@ -335,7 +354,10 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     endTalk: () => api.current.endTalk?.(),
     press: (k, on) => api.current.press?.(k, on),
     use: (id) => api.current.use?.(id),
-    currentRoom: () => api.current.currentRoom?.()
+    currentRoom: () => api.current.currentRoom?.(),
+    pose: () => api.current.pose?.(),
+    snapshot: () => api.current.snapshot?.(),
+    place: (p) => api.current.place?.(p)
   }));
 
   return <div ref={mount} className="world" />;
