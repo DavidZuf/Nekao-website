@@ -177,6 +177,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     // the hall → living room doorway can be closed (David wants a hello first)
     const GATE = [-0.7, -0.3, 0.7, 0.3];
     const gate = { on: false, last: 0 };
+    let locked = false; // during a film moment: no walking, no looking
     const canWalk = (x, z) => {
       if (gate.on && inRect(x, z, GATE)) {
         const now = performance.now();
@@ -187,7 +188,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     };
 
     const onDown = (e) => {
-      if (!activeRef.current || mode !== 'roam') return;
+      if (!activeRef.current || mode !== 'roam' || locked) return;
       if (document.querySelector('[role="dialog"]')) return;
       if (map[e.code]) { keys.add(map[e.code]); e.preventDefault(); }
     };
@@ -211,7 +212,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
       const hit = ray.intersectObjects(models.map((m) => m.group), true)[0];
       return hit && models.find((m) => { let o = hit.object; while (o) { if (o === m.group) return true; o = o.parent; } return false; });
     };
-    const pd = (e) => { if (mode === 'roam') { drag = { x: e.clientX, y: e.clientY }; travelled = 0; } };
+    const pd = (e) => { if (mode === 'roam' && !locked) { drag = { x: e.clientX, y: e.clientY }; travelled = 0; } };
     const pm = (e) => {
       if (!drag) {
         if (mode === 'roam' && e.target === cvs && !previewRef.current) cvs.style.cursor = personAt(e) ? 'pointer' : '';
@@ -411,6 +412,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
         });
       },
       setGate(on) { gate.on = on; },
+      setLocked(on) { locked = on; if (on) keys.clear(); },
       // a cinematic camera move to a standing spot; you can walk again after
       glideTo({ x, z, yaw, pitch = 0 }, dur = 1.6) {
         mode = 'cinematic';
@@ -466,6 +468,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     currentRoom: () => api.current.currentRoom?.(),
     pose: () => api.current.pose?.(),
     setGate: (on) => api.current.setGate?.(on),
+    setLocked: (on) => api.current.setLocked?.(on),
     glideTo: (p, d) => api.current.glideTo?.(p, d),
     snapshot: () => api.current.snapshot?.(),
     place: (p) => api.current.place?.(p)
