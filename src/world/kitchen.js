@@ -73,7 +73,7 @@ function marbleTexture(repeat, seed = 0) {
   }, repeat);
 }
 
-function leopardTexture(repeat) {
+export function leopardTexture(repeat) {
   return canvasTex(512, 512, (g, w, h) => {
     g.fillStyle = '#b9864f'; g.fillRect(0, 0, w, h);
     for (let i = 0; i < 70; i++) {

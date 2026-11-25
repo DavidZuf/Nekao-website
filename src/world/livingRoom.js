@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { buildParis, towerTop, TOWER, glowTexture } from './paris.js';
 import { wash } from './atmosphere.js';
+import { leopardTexture } from './kitchen.js';
 
 // The NEKAO living room, built after the art-direction reference:
 // curved pink sofa in front of a panoramic window on Paris, faceted coffee
@@ -90,10 +91,13 @@ export function buildLivingRoom(scene, wallMat) {
     wash(scene, [x, 0.008, -6.9], [x, 0.008, -0.1], [x + dir * 1.5, 0.008, -6.9], [x + dir * 1.5, 0.008, -0.1], PK, 0.2); // floor reflection
   });
 
-  // ---------- floor rug ----------
-  const rug = new THREE.Mesh(new THREE.CircleGeometry(2.1, 64), new THREE.MeshStandardMaterial({ color: '#1c0f12', roughness: 0.95 }));
+  // ---------- leopard rug under the sofa and table, thin black border ----------
+  const border = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 3.6), new THREE.MeshStandardMaterial({ color: '#0e0809', roughness: 0.9 }));
+  border.rotation.x = -Math.PI / 2;
+  add(scene, border, -2.5, 0.004, -4.65, { cast: false });
+  const rug = new THREE.Mesh(new THREE.PlaneGeometry(4.3, 3.4), new THREE.MeshStandardMaterial({ map: leopardTexture([1.8, 1.45]), color: '#a08672', roughness: 1 }));
   rug.rotation.x = -Math.PI / 2;
-  add(scene, rug, -2.5, 0.004, -4.3, { cast: false });
+  add(scene, rug, -2.5, 0.006, -4.65, { cast: false });
 
   // ---------- curved pink sofa ----------
   const velvet = new THREE.MeshPhysicalMaterial({ color: '#b8104a', roughness: 0.78, sheen: 1, sheenRoughness: 0.45, sheenColor: new THREE.Color('#ff7aa8') });
