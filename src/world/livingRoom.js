@@ -147,9 +147,9 @@ export function buildLivingRoom(scene, wallMat) {
       scene.add(b);
     }
   }
-  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.11, 32, 20), new THREE.MeshStandardMaterial({ color: '#ffe2c4', emissive: '#ffbf80', emissiveIntensity: 2.2 }));
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.11, 32, 20), new THREE.MeshStandardMaterial({ color: '#ffe2c4', emissive: '#ffbf80', emissiveIntensity: 1.0 }));
   add(scene, orb, -2.1, 0.55, -3.8, { cast: false });
-  const orbLight = new THREE.PointLight('#ffb070', 1.0, 3, 2);
+  const orbLight = new THREE.PointLight('#ffb070', 0.6, 3, 2);
   orbLight.position.set(-2.1, 0.6, -3.8);
   scene.add(orbLight);
 
@@ -160,9 +160,9 @@ export function buildLivingRoom(scene, wallMat) {
   add(scene, new THREE.Mesh(new THREE.TubeGeometry(arc, 60, 0.022, 8, false), bronze), 0, 0, 0);
   const shade = new THREE.Mesh(new THREE.ConeGeometry(0.46, 0.2, 40, 1, true), new THREE.MeshStandardMaterial({ color: '#8a4a32', roughness: 0.35, metalness: 0.6, side: THREE.DoubleSide }));
   add(scene, shade, -3.35, 2.1, -5.35);
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd9a8').multiplyScalar(3) }));
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd9a8').multiplyScalar(1.6) }));
   add(scene, bulb, -3.35, 2.0, -5.35, { cast: false });
-  const lampLight = new THREE.SpotLight('#ffc48a', 9, 6, 0.95, 0.6, 1.6);
+  const lampLight = new THREE.SpotLight('#ffc48a', 5, 6, 0.95, 0.6, 1.6);
   lampLight.position.set(-3.35, 1.98, -5.35);
   lampLight.target.position.set(-3.1, 0, -5.2);
   scene.add(lampLight, lampLight.target);
@@ -215,15 +215,15 @@ export function buildLivingRoom(scene, wallMat) {
   add(scene, rod, 1.9, 2.37, -6.35, { cast: false });
 
   // ---------- warm ceiling downlight ----------
-  const down = new THREE.SpotLight('#ffb27a', 14, 7, 0.9, 0.8, 1.5);
+  const down = new THREE.SpotLight('#ffb27a', 8, 7, 0.9, 0.8, 1.5);
   down.position.set(-2.5, H - 0.05, -3.4);
   down.target.position.set(-2.5, 0, -3.9);
   down.castShadow = true;
   down.shadow.mapSize.set(1024, 1024);
   scene.add(down, down.target);
-  const downBulb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 16, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffe0c0').multiplyScalar(3) }));
+  const downBulb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 16, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffe0c0').multiplyScalar(1.6) }));
   add(scene, downBulb, -2.5, H - 0.04, -3.4, { cast: false });
-  const ceilWarm = new THREE.PointLight('#ff9a5a', 2.2, 2.6, 1.6);
+  const ceilWarm = new THREE.PointLight('#ff9a5a', 1.3, 2.6, 1.6);
   ceilWarm.position.set(-2.5, H - 0.35, -3.4);
   scene.add(ceilWarm);
 

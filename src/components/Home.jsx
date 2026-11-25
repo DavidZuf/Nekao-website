@@ -1,7 +1,5 @@
 import { lazy, Suspense, useRef, useState } from 'react';
-import { PRODUCTS } from '../data.js';
 import { Link, navigate } from '../router.jsx';
-import ProductIndex from './ProductIndex.jsx';
 import { ResidentGrid } from './ResidentPage.jsx';
 import Footer from './Footer.jsx';
 import { giveFrame } from '../handoff.js';
@@ -63,13 +61,6 @@ export default function Home() {
         <button type="button" className="sr-only" onClick={open}>Open the door</button>
       </section>
 
-      <section className="section" id="drop">
-        <div className="wardrobe-head">
-          <h2 className="section-title">The wardrobe</h2>
-          <Link to="/shop" className="inline-link">Everything →</Link>
-        </div>
-        <ProductIndex products={Object.values(PRODUCTS)} />
-      </section>
 
       <section className="section">
         <div className="wardrobe-head">
