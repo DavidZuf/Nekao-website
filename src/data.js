@@ -88,10 +88,10 @@ export const MODELS = [
     ]
   },
   {
-    id: 'marcel', name: '[Marcel]', room: 'hall', pos: [-1.3, 0.6], face: 0.6,
+    id: 'david', name: 'David', room: 'hall', pos: [-1.3, 0.6], face: 0.6,
     // standing cut-out (1.85 m), in front of the 'you can smoke inside' neon;
     // tip = the lit end of his cigarette, so the 3D smoke rises from it
-    cutout: { src: '/marcel.png', w: 591, h: 1745, scale: 1.85 / 1737, anchor: [300, 1740], tip: [440, 130] },
+    cutout: { src: '/david.png', w: 591, h: 1745, scale: 1.85 / 1737, anchor: [300, 1740], tip: [440, 130] },
     product: 'tee-black',
     lines: [
       'Read the sign. I put it there.',
