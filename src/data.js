@@ -88,6 +88,17 @@ export const MODELS = [
     ]
   },
   {
+    id: 'marcel', name: '[Marcel]', room: 'hall', pos: [-1.3, 0.6], face: 0.6,
+    // standing cut-out (1.85 m), in front of the 'you can smoke inside' neon;
+    // tip = the lit end of his cigarette, so the 3D smoke rises from it
+    cutout: { src: '/marcel.png', w: 591, h: 1745, scale: 1.85 / 1737, anchor: [300, 1740], tip: [440, 130] },
+    product: 'tee-black',
+    lines: [
+      'Read the sign. I put it there.',
+      'All black, every night. It never asks me to explain myself.'
+    ]
+  },
+  {
     id: 'daisy', name: 'Daisy', room: 'living', pos: [-3.95, -3.7], face: 0.4,
     // standing cut-out of the illustration (1.8 m tall), feet on the floor
     cutout: { src: '/daisy.png', w: 619, h: 1526, scale: 1.8 / 1526, anchor: [446, 1526], tip: [23, 250] },
