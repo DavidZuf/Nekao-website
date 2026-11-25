@@ -213,7 +213,6 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .residents { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
 
 
-.about .lead { max-width: 620px; }
 .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; margin: 56px 0; }
 .about-grid h2, .help-block h2 { margin: 0 0 10px; font-family: var(--display); font-weight: 400; font-size: 32px; letter-spacing: 0.04em; }
 .about-grid p, .help-block p { margin: 0; color: var(--muted); line-height: 1.6; }
@@ -566,3 +565,8 @@ body { font-synthesis: none; }
 .swipe-name.hand { font-size: 38px; line-height: 0.8; }
 .swipe-top h1 { font-size: 30px; }
 .mobile-menu a { text-transform: uppercase; letter-spacing: 0.06em; font-size: 40px; }
+
+/* about: just the logo and a few words */
+.about { min-height: calc(100svh - 120px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 120px 20px 60px; text-align: center; }
+.about img { width: 96px; height: 96px; }
+.about p { margin: 0; max-width: 460px; font-size: 17px; line-height: 1.7; color: var(--muted); }
