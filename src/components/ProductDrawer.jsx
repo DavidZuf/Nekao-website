@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { SIZES } from '../data.js';
 import { Link } from '../router.jsx';
-import TeeVisual from './TeeVisual.jsx';
+import LookVisual from './LookVisual.jsx';
 
 // Quick view used inside the apartment, so you can buy without leaving.
 export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
@@ -22,18 +22,15 @@ export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
       <div className="scrim" onClick={onClose} />
       <aside className="drawer" role="dialog" aria-label={product.name}>
         <div className="drawer-top">
-          <span className="eyebrow eyebrow--dark">{roomName ? `Worn in the ${roomName}` : 'NEKAO'}</span>
+          <span className="drawer-where">{roomName ? `Worn in the ${roomName}` : 'NEKAO'}</span>
           <button type="button" className="close" onClick={onClose} aria-label="Close">×</button>
         </div>
-        <div className="product-visual" style={{ background: product.swatch === '#141412' ? '#1f1f1c' : '#141412' }}>
-          <TeeVisual product={product} size={220} />
-          <span className="photo-note">[Swap for product photo]</span>
-        </div>
-        <h2>{product.name}</h2>
-        <p className="price">{product.price}</p>
-        <div className="sizes">
-          <span className="eyebrow eyebrow--dark">Size: {size}</span>
-          <div className="size-row">
+        <div className="drawer-look"><LookVisual product={product} teeSize={200} roomName={roomName} /></div>
+        <h2 className="drawer-name">{product.name.replace(/^\[Tee name\] — /, '')}</h2>
+        <p className="tag-price">{product.price}</p>
+        <div className="tag-sizes">
+          <span>Size</span>
+          <div>
             {SIZES.map((s) => (
               <button key={s} type="button" className={s === size ? 'is-active' : ''} onClick={() => setSize(s)}>{s}</button>
             ))}
@@ -41,13 +38,13 @@ export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
         </div>
         <button
           type="button"
-          className="btn btn--dark"
+          className="tag-add"
           onClick={() => { onAdd(product, size); setAdded(true); }}
         >
-          {added ? 'Added ✓ — add another' : 'Add to bag'}
+          {added ? `Added, size ${size}. Add another?` : 'Add to bag'}
         </button>
         <p className="details">{product.details}</p>
-        <Link to={`/shop/${product.id}`} className="link link--dark" onClick={onClose}>Full details, size guide & shipping →</Link>
+        <Link to={`/shop/${product.id}`} className="drawer-more" onClick={onClose}>Size guide, fabric & shipping →</Link>
       </aside>
     </>
   );

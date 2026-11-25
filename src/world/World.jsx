@@ -186,8 +186,13 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
       const pv = previewRef.current;
       if (pv) {
         [player.x, player.z] = pv;
+        // tall phone screens: see wider and look down a little, so the
+        // residents sit in the top half, above the room's info panel
+        const tall = camera.aspect < 0.8;
+        const fov = tall ? 84 : 62;
+        if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
         player.yaw = pv[2] + Math.sin(t * 0.25) * 0.07;
-        player.pitch = -0.04 + Math.sin(t * 0.17) * 0.015;
+        player.pitch = (tall ? -0.3 : -0.04) + Math.sin(t * 0.17) * 0.015;
         placeCamera();
       } else if (!activeRef.current) return;
 

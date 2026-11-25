@@ -204,11 +204,6 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .btn--wide { width: 100%; }
 
 .residents { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-.resident { display: flex; flex-direction: column; gap: 6px; }
-.resident-visual { aspect-ratio: 3 / 4; background: radial-gradient(ellipse at 50% 80%, #3a1418, #120c0d 70%); display: grid; place-items: end center; overflow: hidden; transition: filter 0.2s; }
-.resident:hover .resident-visual { filter: brightness(1.15); }
-.resident-visual img { height: 92%; width: 100%; object-fit: contain; object-position: bottom; }
-.resident-placeholder { width: 50%; height: 60%; display: grid; place-items: center; font-size: 11px; letter-spacing: 0.2em; color: #77716a; }
 
 
 .about .lead { max-width: 620px; }
@@ -464,3 +459,67 @@ kbd {
 .choices button { font-family: var(--display); font-style: italic; font-size: 18px; padding: 0 20px; }
 .skip-hint { font-family: var(--display); font-style: italic; font-size: 15px; letter-spacing: 0.02em; text-transform: none; }
 .map-note { font-family: var(--display); font-style: italic; font-size: 17px; letter-spacing: 0; text-transform: none; }
+
+/* ---------- residents ---------- */
+.resident { display: flex; flex-direction: column; gap: 4px; }
+.portrait { position: relative; aspect-ratio: 3 / 4; overflow: hidden; background: radial-gradient(ellipse at 50% 85%, #5a1424 0%, #2b0b11 45%, #120609 100%); transition: filter 0.25s; }
+.resident:hover .portrait { filter: brightness(1.18); }
+.portrait img { position: absolute; left: 0; bottom: 0; width: 100%; height: 93%; object-fit: contain; object-position: bottom; }
+.portrait-empty { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-style: italic; font-size: 17px; color: #8a7a7c; }
+.resident-name { margin-top: 6px; font-family: var(--display); font-style: italic; font-size: 26px; line-height: 1; }
+.resident-meta { font-size: 13px; color: var(--quiet); }
+
+.res { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 100svh; }
+.res .portrait { aspect-ratio: auto; min-height: 100svh; }
+.res-text { padding: 120px clamp(20px, 5vw, 72px) 60px; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+.res-back { align-self: flex-start; font-size: 13px; color: var(--quiet); text-decoration: underline; text-underline-offset: 3px; }
+.res-text h1 { margin: 0; font-family: var(--display); font-style: italic; font-weight: 500; font-size: clamp(72px, 10vw, 140px); line-height: 0.85; }
+.res-room { margin: -4px 0 8px; color: #ff8fb0; font-family: var(--display); font-style: italic; font-size: 22px; }
+.res-lines { display: flex; flex-direction: column; gap: 14px; border-left: 1px solid #5a2a32; padding-left: 20px; }
+.res-lines blockquote { margin: 0; font-family: var(--display); font-size: clamp(22px, 2.2vw, 30px); line-height: 1.25; color: var(--cream); }
+.res-wearing { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding: 16px 0; border-top: 1px solid #3a2a2c; border-bottom: 1px solid #3a2a2c; }
+.res-wearing span { font-size: 13px; color: var(--quiet); }
+.res-wearing strong { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 30px; }
+.res-wearing em { margin-left: auto; font-style: normal; }
+.res-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.res-actions .btn { font-family: var(--display); font-style: italic; font-size: 20px; letter-spacing: 0.01em; text-transform: none; height: 54px; }
+@media (max-width: 800px) {
+  .res { grid-template-columns: 1fr; }
+  .res .portrait { min-height: 0; aspect-ratio: 4 / 5; margin-top: 70px; }
+  .res-text { padding-top: 28px; }
+}
+
+/* ---------- phone apartment: swipe through rooms ---------- */
+.swipe { position: relative; height: 100%; overflow: hidden; background: #060405; touch-action: pan-y; }
+.swipe .world canvas { pointer-events: none; }
+.swipe .travel-fade { z-index: 3; }
+.swipe-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; padding: 18px 16px calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, rgba(6,2,4,0.88) 22%, rgba(6,2,4,0.96)); display: flex; flex-direction: column; gap: 12px;
+}
+.swipe-top { display: flex; align-items: center; justify-content: space-between; padding-top: 30px; }
+.swipe-top h1 { margin: 0; font-family: var(--display); font-style: italic; font-weight: 500; font-size: 40px; line-height: 1; }
+.swipe-top button { width: 44px; height: 44px; border: 1px solid rgba(240,235,225,0.3); border-radius: 50%; background: rgba(0,0,0,0.3); font-size: 24px; line-height: 1; cursor: pointer; }
+.swipe-dots { display: flex; justify-content: center; gap: 8px; margin-top: -4px; }
+.swipe-dots button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: rgba(240,235,225,0.3); }
+.swipe-dots button.is-on { background: #ff8fb0; width: 20px; border-radius: 4px; }
+.swipe-who { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px; background: rgba(240,235,225,0.06); border: 1px solid rgba(240,235,225,0.12); }
+.swipe-face { width: 56px; height: 68px; overflow: hidden; background: radial-gradient(ellipse at 50% 85%, #5a1424, #1a0a0d 80%); position: relative; }
+.swipe-face img { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; object-fit: contain; object-position: top; }
+.swipe-face span { position: absolute; inset: 20% 25%; }
+.swipe-info { min-width: 0; }
+.swipe-name { font-family: var(--display); font-style: italic; font-size: 22px; line-height: 1; }
+.swipe-info p { margin: 3px 0 0; font-size: 12px; line-height: 1.4; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.swipe-shop { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 12px; border: 0; background: var(--cream); color: var(--ink); font-family: var(--display); font-style: italic; font-size: 16px; cursor: pointer; white-space: nowrap; }
+.swipe-shop small { font-family: var(--body); font-style: normal; font-size: 11px; color: #5f5a52; }
+.swipe-walk { align-self: center; font-size: 12px; color: var(--quiet); text-decoration: underline; text-underline-offset: 3px; }
+.swipe-loading { position: absolute; left: 0; right: 0; top: 30%; margin: 0; text-align: center; font-family: var(--display); font-style: italic; font-size: 22px; color: var(--quiet); }
+.swipe .world { z-index: 1; }
+
+/* quick-buy panel, same hang-tag look as the tee page */
+.drawer { background: #efe6d6; gap: 14px; }
+.drawer-where { font-family: var(--display); font-style: italic; font-size: 18px; color: #6b655c; }
+.drawer-look { height: 300px; flex-shrink: 0; }
+.drawer .drawer-name { font-style: italic; font-weight: 500; font-size: 48px; }
+.drawer .details { margin-top: 4px; }
+.drawer-more { font-family: var(--display); font-style: italic; font-size: 18px; color: #b0103f; }

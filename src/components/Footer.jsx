@@ -20,8 +20,9 @@ export default function Footer() {
       <div className="footer-cols">
         <div>
           <span className="eyebrow">Shop</span>
-          <Link to="/shop">All tees</Link>
+          <Link to="/shop">Wardrobe</Link>
           <Link to="/apartment">The Apartment</Link>
+          <Link to="/residents">Residents</Link>
         </div>
         <div>
           <span className="eyebrow">Help</span>

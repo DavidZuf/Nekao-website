@@ -61,11 +61,12 @@ export const PRODUCTS = {
 export const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
 // Rooms: rectangles on the floor plan (metres). `spawn` = where you land
-// after fast travel [x, z, yaw]. In the real version the 3D apartment
-// comes from a scan.
+// after fast travel [x, z, yaw]. `view` = optional fixed camera for the
+// phone room-swipe (otherwise it looks from `spawn` toward the residents).
+// In the real version the 3D apartment comes from a scan.
 export const ROOMS = [
   { id: 'hall', name: 'Entrance hall', rect: [-2, 0, 2, 4], spawn: [0, 3.3, 0] },
-  { id: 'living', name: 'Living room', rect: [-7, -7, 2, 0], spawn: [-2.5, -0.6, 0] },
+  { id: 'living', name: 'Living room', rect: [-7, -7, 2, 0], spawn: [-2.5, -0.6, 0], view: [-0.8, -0.1, 0.5] },
   { id: 'kitchen', name: 'Kitchen', rect: [2, -7, 8, 0], spawn: [2.8, -3.3, -Math.PI / 2] },
   { id: 'bedroom', name: 'Bedroom', rect: [2, 0, 8, 6], spawn: [2.8, 2, -Math.PI / 2] },
   { id: 'balcony', name: 'Balcony', rect: [-7, 0, -2, 3], spawn: [-4.5, 0.5, Math.PI], outdoor: true }
@@ -137,3 +138,16 @@ export const MODELS = [
 // Who wears a product, and in which room (for "seen in" labels and links).
 export const wornBy = (productId) =>
   MODELS.filter((m) => m.product === productId).map((m) => ({ model: m, room: ROOMS.find((r) => r.id === m.room) }));
+
+export const residentsIn = (roomId) => MODELS.filter((m) => m.room === roomId);
+
+// A fixed camera that frames a room's residents [x, z, yaw].
+export const roomView = (room) => {
+  if (room.view) return room.view;
+  const [x, z] = room.spawn;
+  const who = residentsIn(room.id);
+  if (!who.length) return room.spawn;
+  const tx = who.reduce((a, m) => a + m.pos[0], 0) / who.length;
+  const tz = who.reduce((a, m) => a + m.pos[1], 0) / who.length;
+  return [x, z, Math.atan2(-(tx - x), -(tz - z))];
+};

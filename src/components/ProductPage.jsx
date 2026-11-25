@@ -68,8 +68,8 @@ export default function ProductPage({ product, onAdd }) {
           </dl>
 
           {worn.map(({ model, room }) => (
-            <Link key={model.id} to={`/apartment/${room.id}`} className="tag-meet">
-              Worn by {model.name} in the {room.name.toLowerCase()}. <em>Go say hi →</em>
+            <Link key={model.id} to={`/residents/${model.id}`} className="tag-meet">
+              Worn by {model.name}, {room.name.toLowerCase()}. <em>Meet {model.name} →</em>
             </Link>
           ))}
         </aside>

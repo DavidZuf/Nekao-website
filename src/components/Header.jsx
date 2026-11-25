@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from '../router.jsx';
 
 const NAV = [
-  { to: '/shop', label: 'Shop' },
+  { to: '/shop', label: 'Wardrobe' },
   { to: '/apartment', label: 'The Apartment' },
+  { to: '/residents', label: 'Residents' },
   { to: '/about', label: 'About' }
 ];
 

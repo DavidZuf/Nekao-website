@@ -1,7 +1,8 @@
 import { lazy, Suspense, useState } from 'react';
-import { PRODUCTS, MODELS, ROOMS } from '../data.js';
+import { PRODUCTS } from '../data.js';
 import { Link, navigate } from '../router.jsx';
 import ProductIndex from './ProductIndex.jsx';
+import { ResidentGrid } from './ResidentPage.jsx';
 import Footer from './Footer.jsx';
 
 // The live living room, seen through the peephole. Click to go in.
@@ -41,24 +42,9 @@ export default function Home() {
       <section className="section">
         <div className="wardrobe-head">
           <h2 className="section-title">The residents</h2>
-          <Link to="/apartment" className="inline-link">Go in →</Link>
+          <Link to="/residents" className="inline-link">Meet them →</Link>
         </div>
-        <div className="residents">
-          {MODELS.map((m) => {
-            const room = ROOMS.find((r) => r.id === m.room);
-            return (
-              <Link key={m.id} to={`/apartment/${room.id}`} className="resident">
-                <div className="resident-visual">
-                  {m.cutout
-                    ? <img src={m.cutout.src} alt="" />
-                    : <span className="resident-placeholder" style={{ background: PRODUCTS[m.product].swatch }}>[Photo]</span>}
-                </div>
-                <span className="card-name">{m.name}</span>
-                <span className="card-meta">{room.name} · wearing {PRODUCTS[m.product].color.toLowerCase()}</span>
-              </Link>
-            );
-          })}
-        </div>
+        <ResidentGrid />
       </section>
       <Footer />
     </main>
