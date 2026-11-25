@@ -3,6 +3,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { buildParis, towerTop, TOWER, glowTexture } from './paris.js';
 import { wash } from './atmosphere.js';
 import { leopardTexture } from './kitchen.js';
+import { neonSign } from './neon.js';
 
 // The NEKAO living room, built after the art-direction reference:
 // curved pink sofa in front of a panoramic window on Paris, faceted coffee
@@ -255,20 +256,7 @@ export function buildLivingRoom(scene, wallMat) {
   scene.add(picLight, picLight.target);
 
   // ---------- art: pink neon script on the right wall ----------
-  const neonTex = canvasTex(1024, 360, () => {});
-  const drawNeon = () => {
-    const c = neonTex.image; const g = c.getContext('2d');
-    g.clearRect(0, 0, c.width, c.height);
-    g.font = '200px "Mrs Saint Delafield", cursive'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    [[40, 'rgba(255,42,109,0.55)'], [18, 'rgba(255,90,140,0.9)'], [4, '#ffe0ea']].forEach(([blur, col]) => {
-      g.shadowColor = '#ff2a6d'; g.shadowBlur = blur; g.fillStyle = col;
-      g.fillText('après minuit', c.width / 2, c.height / 2 + 10);
-    });
-    neonTex.needsUpdate = true;
-  };
-  drawNeon();
-  document.fonts?.load('200px "Mrs Saint Delafield"').then(drawNeon).catch(() => {});
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.63), new THREE.MeshBasicMaterial({ map: neonTex, transparent: true, depthWrite: false, color: new THREE.Color('#ffffff').multiplyScalar(1.6) }));
+  const sign = neonSign('après minuit');
   sign.rotation.y = -Math.PI / 2;
   add(scene, sign, 1.9, 1.75, -1.4, { cast: false, receive: false });
   pink(1.6, 1.75, -1.4, 0.35); // its glow on the wall

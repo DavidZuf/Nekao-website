@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { neonSign } from './neon.js';
 import { ROOMS } from '../data.js';
 import { buildLivingRoom, LIVING_BLOCKERS } from './livingRoom.js';
 import { buildKitchen, KITCHEN_BLOCKERS } from './kitchen.js';
@@ -102,6 +103,15 @@ export function buildApartment(scene, renderer) {
   wallSegments(scene, 'x', -7, -7, 0, M.wall); // living west
   wallSegments(scene, 'x', 8, 0, 6, M.wall); // east (bedroom); the kitchen builds its own window wall
   wallSegments(scene, 'z', 6, 2, 8, M.wall); // bedroom south
+
+  // hall: pink neon on the west wall, the first thing you read coming in
+  const smoke = neonSign('you can smoke inside', { width: 2.3, height: 0.6, px: 150 });
+  smoke.rotation.y = Math.PI / 2;
+  smoke.position.set(-1.9, 1.7, 1.9);
+  scene.add(smoke);
+  const smokeGlow = new THREE.PointLight('#ff2a6d', 0.4, 4, 1.8);
+  smokeGlow.position.set(-1.6, 1.7, 1.9);
+  scene.add(smokeGlow);
 
   // front door
   box(scene, [-0.55, 3.86, 0.55, 3.94], 0, 2.15, M.linen);

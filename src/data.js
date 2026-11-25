@@ -126,7 +126,17 @@ export const MODELS = [
     ]
   },
   {
-    id: 'nael', name: '[Naël]', room: 'balcony', pos: [-4.5, 2.2], face: Math.PI,
+    id: 'rouge', name: '[Rouge]', room: 'balcony', pos: [-4.1, 2.3], face: Math.PI,
+    // standing cut-out (1.75 m tall), red heels on the balcony floor
+    cutout: { src: '/rouge.png', w: 677, h: 1569, scale: 1.75 / 1552, anchor: [300, 1560] },
+    product: 'tee-stripe',
+    lines: [
+      'Close the door behind you, the city is louder than the party.',
+      'White tee, red heels. Paris does the rest.'
+    ]
+  },
+  {
+    id: 'nael', name: '[Naël]', room: 'balcony', pos: [-6.1, 2.0], face: Math.PI,
     product: 'tee-black', skin: '#7a5640', hair: '#141412',
     lines: [
       'Best view in the building. Don\'t tell the others.',
