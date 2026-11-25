@@ -321,6 +321,9 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
         if (key(near) !== key(lastNear)) { lastNear = near; onNearby?.(near); }
       }
 
+      // safety net: a camera move that lost its shot must never lock the controls
+      if (mode === 'cinematic' && !shot) mode = 'roam';
+
       if (mode === 'cinematic' && shot) {
         shot.t = Math.min(1, (performance.now() - shot.start) / 1000 / shot.dur);
         const k = ease(shot.t);
@@ -341,7 +344,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
       if (frames < 5 || frames % 30 === 0) renderer.shadowMap.needsUpdate = true;
       composer.render();
       frames += 1;
-      if (frames === 4) onReady?.();
+      if (frames === 8) onReady?.(); // a few real frames on screen before we uncover it
     };
     tick();
 
@@ -366,6 +369,18 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
       pose: () => ({ x: player.x, z: player.z, yaw: player.yaw, pitch: player.pitch }),
       snapshot() { composer.render(); return renderer.domElement.toDataURL('image/jpeg', 0.9); },
       place({ x, z, yaw, pitch = 0 }) {
+        // never leave you standing somewhere you can't walk out of:
+        // step to the nearest walkable spot (usually a few centimetres)
+        if (!walkable(x, z)) {
+          let best = null;
+          for (let r = 0.05; r <= 1.2 && !best; r += 0.05) {
+            for (let a = 0; a < Math.PI * 2; a += Math.PI / 12) {
+              const nx = x + Math.cos(a) * r, nz = z + Math.sin(a) * r;
+              if (walkable(nx, nz)) { best = [nx, nz]; break; }
+            }
+          }
+          if (best) [x, z] = best;
+        }
         Object.assign(player, { x, z, yaw, pitch });
         keys.clear();
         placeCamera();

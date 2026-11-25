@@ -69,6 +69,7 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
       await wait(900);
       await world.current?.glideTo({ x: 0, z: -0.8, yaw: Math.PI, pitch: 0 }, 1.3); // turn round to the door
       await world.current?.glideTo({ x: 0.3, z: 2.1, yaw: 0.82, pitch: 0.02 }, 1.7); // back through it, to him
+      window.history.replaceState({}, '', '/apartment/hall');
       setCine(null);
       talk({ ...DAVID, lines: [DAVID.greeting, ...DAVID.lines] });
     }, 2000);

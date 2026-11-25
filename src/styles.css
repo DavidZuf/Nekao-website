@@ -543,6 +543,8 @@ kbd {
 .handoff { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; pointer-events: none; transition: opacity 0.5s ease 0.15s; }
 .handoff.is-gone { opacity: 0; }
 .experience:has(.handoff) .world { animation: none; }
+/* until the first frames are drawn, the canvas stays hidden behind the still */
+.experience:has(.handoff:not(.is-gone)) .world canvas { visibility: hidden; }
 
 /* =========================================================
    Type: Italiana (couture caps) + handwritten resident names

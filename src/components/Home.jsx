@@ -7,7 +7,7 @@ import { giveFrame } from '../handoff.js';
 // The live living room, seen through the peephole. Drag to look around,
 // click and the peephole opens up into the apartment.
 const World = lazy(() => import('../world/World.jsx'));
-const PEEP_VIEW = [-0.8, -0.1, 0.4]; // x, z, yaw: Daisy and Gigi on the sofa
+const PEEP_VIEW = [-0.8, -0.4, 0.4]; // x, z, yaw: Daisy and Gigi on the sofa (a walkable spot: you land here)
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 export default function Home() {
