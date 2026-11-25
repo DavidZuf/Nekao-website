@@ -244,7 +244,7 @@ export function buildLivingRoom(scene, wallMat) {
     g.fillStyle = gr; g.fillRect(0, 0, w, h);
   });
   band.wrapS = band.wrapT = THREE.ClampToEdgeWrapping;
-  const beam = new THREE.SpotLight('#fff3e2', 0, 0, 0.17, 0.25, 0);
+  const beam = new THREE.SpotLight('#ff7aa8', 0, 0, 0.17, 0.25, 0);
   beam.position.copy(CENTER).addScaledVector(toTower, 60);
   beam.target.position.copy(CENTER);
   beam.map = band;
@@ -257,7 +257,7 @@ export function buildLivingRoom(scene, wallMat) {
   scene.add(beam, beam.target);
 
   // light bouncing off the lit surfaces (fills the ceiling, sofa front)
-  const bounce = new THREE.PointLight('#ffe6d6', 0, 8, 1.3);
+  const bounce = new THREE.PointLight('#ffb0c8', 0, 8, 1.3);
   bounce.position.set(-2.5, 1.0, -2.6);
   scene.add(bounce);
 
@@ -271,7 +271,7 @@ export function buildLivingRoom(scene, wallMat) {
     gv.addColorStop(0, 'rgba(0,0,0,0)'); gv.addColorStop(0.3, 'rgba(0,0,0,1)'); gv.addColorStop(0.7, 'rgba(0,0,0,1)'); gv.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = gv; g.fillRect(0, 0, w, h);
   });
-  const shaftMat = new THREE.MeshBasicMaterial({ color: '#fff1dc', map: shaftTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+  const shaftMat = new THREE.MeshBasicMaterial({ color: '#ff9ab8', map: shaftTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
   const shaftGroup = new THREE.Group();
   for (let i = 0; i < 5; i++) {
     const s = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1.9), shaftMat);

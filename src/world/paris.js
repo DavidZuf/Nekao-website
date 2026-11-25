@@ -158,16 +158,25 @@ function beacon(scene) {
   const geo = new THREE.CylinderGeometry(11, 0.35, 700, 24, 1, true);
   geo.translate(0, 350, 0);
   geo.rotateX(Math.PI / 2);
-  const mat = new THREE.MeshBasicMaterial({ color: '#fff4e0', alphaMap: fade, transparent: true, opacity: 0.05, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false });
+  // pink neon: a soft pink cone around a bright thin core
+  const mat = new THREE.MeshBasicMaterial({ color: '#ff3a7a', alphaMap: fade, transparent: true, opacity: 0.08, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false });
+  const coreGeo = new THREE.CylinderGeometry(1.1, 0.12, 700, 12, 1, true);
+  coreGeo.translate(0, 350, 0);
+  coreGeo.rotateX(Math.PI / 2);
+  const coreMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff4f8b').multiplyScalar(2.2), alphaMap: fade, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false });
   const group = new THREE.Group();
   group.position.copy(towerTop());
   const a = new THREE.Mesh(geo, mat);
   const b = new THREE.Mesh(geo, mat);
   b.rotation.y = Math.PI;
   a.rotation.x = b.rotation.x = -0.015;
-  group.add(a, b);
+  const ca = new THREE.Mesh(coreGeo, coreMat);
+  const cb = new THREE.Mesh(coreGeo, coreMat);
+  cb.rotation.y = Math.PI;
+  ca.rotation.x = cb.rotation.x = -0.015;
+  group.add(a, b, ca, cb);
   scene.add(group);
-  const flare = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: '#fff2dc', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  const flare = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: '#ff8fb8', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
   flare.position.copy(towerTop());
   scene.add(flare);
   return { group, flare, mat };
