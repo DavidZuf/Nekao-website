@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import World from '../world/World.jsx';
 import Cutscene from './Cutscene.jsx';
+import KeyHint from './KeyHint.jsx';
 import { ROOMS, PRODUCTS } from '../data.js';
 import { takeFrame } from '../handoff.js';
 
@@ -107,12 +108,7 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
 
           <button type="button" className="map-btn" onClick={() => setMapOpen(true)}>Rooms</button>
 
-          {help && (
-            <div className="controls-help">
-              <div>Arrows to walk · drag to look · click someone to meet them</div>
-              <button type="button" className="link" onClick={() => setHelp(false)}>Got it</button>
-            </div>
-          )}
+          <KeyHint />
 
           <div className="dpad" aria-hidden="true">
             <button type="button" className="dpad-up" {...pad('f')}>▲</button>

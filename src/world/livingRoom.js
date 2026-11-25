@@ -214,6 +214,65 @@ export function buildLivingRoom(scene, wallMat) {
   rod.rotation.x = Math.PI / 2;
   add(scene, rod, 1.9, 2.37, -6.35, { cast: false });
 
+  // ---------- art: a framed painting on the left wall ----------
+  const painting = canvasTex(1024, 680, (g, w, h) => {
+    g.fillStyle = '#efe3d3'; g.fillRect(0, 0, w, h); // paper
+    g.fillStyle = '#c8103f'; // big red cut-out
+    g.beginPath(); g.moveTo(80, 600); g.bezierCurveTo(60, 380, 210, 210, 360, 260); g.bezierCurveTo(470, 300, 430, 470, 520, 540); g.bezierCurveTo(580, 590, 560, 640, 520, 680); g.lineTo(80, 680); g.fill();
+    g.fillStyle = '#f2a9bf'; // blush moon
+    g.beginPath(); g.arc(770, 210, 120, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#141012'; // black arch
+    g.beginPath(); g.moveTo(640, 680); g.lineTo(640, 470); g.arc(760, 470, 120, Math.PI, 0); g.lineTo(880, 680); g.fill();
+    g.fillStyle = '#c9a15a'; g.beginPath(); g.arc(300, 150, 34, 0, Math.PI * 2); g.fill(); // gold dot
+    // one-line face over everything
+    g.strokeStyle = '#141012'; g.lineWidth = 7; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.beginPath();
+    g.moveTo(470, 110); g.bezierCurveTo(400, 120, 380, 220, 420, 270); // forehead
+    g.bezierCurveTo(440, 300, 400, 320, 430, 345); // nose
+    g.bezierCurveTo(445, 360, 420, 380, 440, 395); // lips
+    g.bezierCurveTo(460, 410, 430, 440, 470, 470); // chin
+    g.bezierCurveTo(520, 500, 600, 470, 610, 400); // jaw
+    g.bezierCurveTo(630, 300, 600, 150, 470, 110); // back of the head
+    g.moveTo(450, 230); g.bezierCurveTo(470, 215, 500, 215, 515, 232); // closed eye
+    g.stroke();
+    g.fillStyle = '#c8103f'; g.beginPath(); g.ellipse(437, 385, 14, 8, 0.3, 0, Math.PI * 2); g.fill(); // red lips
+    g.fillStyle = '#141012'; g.font = 'italic 28px Georgia, serif'; g.fillText('N.', 940, 650); // signature
+  });
+  const PW = 1.9, PH = 1.26, PX = -6.9, PZ = -3.1, PY = 1.5;
+  const gold = new THREE.MeshStandardMaterial({ color: '#b8925a', roughness: 0.35, metalness: 0.85 });
+  const canvasMesh = new THREE.Mesh(new THREE.PlaneGeometry(PW, PH), new THREE.MeshStandardMaterial({ map: painting, roughness: 0.9 }));
+  canvasMesh.rotation.y = Math.PI / 2;
+  add(scene, canvasMesh, PX + 0.03, PY, PZ, { cast: false });
+  [[0, PH / 2 + 0.02, PW + 0.08, 0.04], [0, -PH / 2 - 0.02, PW + 0.08, 0.04], [PW / 2 + 0.02, 0, 0.04, PH], [-PW / 2 - 0.02, 0, 0.04, PH]].forEach(([dz, dy, w, hh]) => {
+    const f = new THREE.Mesh(new THREE.BoxGeometry(0.05, hh, w), gold);
+    add(scene, f, PX + 0.02, PY + dy, PZ - dz, { cast: false });
+  });
+  // brass picture light above it
+  add(scene, new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.7, 12).rotateX(Math.PI / 2), gold), PX + 0.16, PY + PH / 2 + 0.16, PZ, { cast: false });
+  const picLight = new THREE.SpotLight('#ffd2a0', 3, 3, 0.75, 0.7, 1.5);
+  picLight.position.set(PX + 0.25, PY + PH / 2 + 0.15, PZ);
+  picLight.target.position.set(PX, PY - 0.2, PZ);
+  scene.add(picLight, picLight.target);
+
+  // ---------- art: pink neon script on the right wall ----------
+  const neonTex = canvasTex(1024, 360, () => {});
+  const drawNeon = () => {
+    const c = neonTex.image; const g = c.getContext('2d');
+    g.clearRect(0, 0, c.width, c.height);
+    g.font = '200px "Mrs Saint Delafield", cursive'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    [[40, 'rgba(255,42,109,0.55)'], [18, 'rgba(255,90,140,0.9)'], [4, '#ffe0ea']].forEach(([blur, col]) => {
+      g.shadowColor = '#ff2a6d'; g.shadowBlur = blur; g.fillStyle = col;
+      g.fillText('après minuit', c.width / 2, c.height / 2 + 10);
+    });
+    neonTex.needsUpdate = true;
+  };
+  drawNeon();
+  document.fonts?.load('200px "Mrs Saint Delafield"').then(drawNeon).catch(() => {});
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.63), new THREE.MeshBasicMaterial({ map: neonTex, transparent: true, depthWrite: false, color: new THREE.Color('#ffffff').multiplyScalar(1.6) }));
+  sign.rotation.y = -Math.PI / 2;
+  add(scene, sign, 1.9, 1.75, -1.4, { cast: false, receive: false });
+  pink(1.6, 1.75, -1.4, 0.35); // its glow on the wall
+
   // ---------- warm ceiling downlight ----------
   const down = new THREE.SpotLight('#ffb27a', 8, 7, 0.9, 0.8, 1.5);
   down.position.set(-2.5, H - 0.05, -3.4);
