@@ -330,7 +330,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
         const k = ease(shot.t);
         camera.position.lerpVectors(shot.fromPos, shot.toPos, k);
         camera.quaternion.slerpQuaternions(shot.fromQ, shot.toQ, k);
-        if (shot.model) {
+        if (shot.model && !shot.model.group.userData.update) { // drawn cut-outs already face you
           const g = shot.model.group;
           g.rotation.y += (shot.faceTo - g.rotation.y) * Math.min(1, dt * 4);
         }

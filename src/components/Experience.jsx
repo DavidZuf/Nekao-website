@@ -164,7 +164,7 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
                 {!nearby.thing && (
                   <>
                     <i className="prompt-dot" aria-hidden="true" />
-                    <button type="button" className="prompt-act prompt-act--shop" onClick={() => onShowTee(nearby.product)}>
+                    <button type="button" className="prompt-act prompt-act--shop" onClick={() => onShowTee(nearby.product, nearby.id)}>
                       shop the look · {PRODUCTS[nearby.product].price}
                     </button>
                   </>
@@ -232,7 +232,7 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
           model={talking}
           product={PRODUCTS[talking.product]}
           ready={talkReady}
-          onShowTee={() => onShowTee(talking.product)}
+          onShowTee={() => onShowTee(talking.product, talking.id)}
           onClose={endTalk}
         />
       )}

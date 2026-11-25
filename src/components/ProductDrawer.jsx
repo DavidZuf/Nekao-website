@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { SIZES } from '../data.js';
+import { SIZES, MODELS, ROOMS, nameOf } from '../data.js';
 import { Link } from '../router.jsx';
 import LookVisual from './LookVisual.jsx';
 
 // Quick view used inside the apartment, so you can buy without leaving.
-export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
+export default function ProductDrawer({ product, roomName, who, onClose, onAdd }) {
   const [size, setSize] = useState('M');
   const [added, setAdded] = useState(false);
 
@@ -16,16 +16,20 @@ export default function ProductDrawer({ product, roomName, onClose, onAdd }) {
   }, [onClose]);
 
   if (!product) return null;
+  const person = MODELS.find((m) => m.id === who && m.product === product.id);
+  const where = person
+    ? `Worn by ${nameOf(person)}, ${ROOMS.find((r) => r.id === person.room).name.toLowerCase()}`
+    : roomName ? `Worn in the ${roomName}` : 'NEKAO';
 
   return (
     <>
       <div className="scrim" onClick={onClose} />
       <aside className="drawer" role="dialog" aria-label={product.name}>
         <div className="drawer-top">
-          <span className="drawer-where">{roomName ? `Worn in the ${roomName}` : 'NEKAO'}</span>
+          <span className="drawer-where">{where}</span>
           <button type="button" className="close" onClick={onClose} aria-label="Close">×</button>
         </div>
-        <div className="drawer-look"><LookVisual product={product} teeSize={200} roomName={roomName} /></div>
+        <div className="drawer-look"><LookVisual product={product} teeSize={200} roomName={roomName} who={who} /></div>
         <h2 className="drawer-name">{product.name.replace(/^\[Tee name\] — /, '')}</h2>
         <p className="tag-price">{product.price}</p>
         <div className="tag-sizes">

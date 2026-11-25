@@ -32,7 +32,10 @@ const loadBag = () => {
 export default function App() {
   const path = usePath();
   const [room, setRoom] = useState(null);
-  const [productId, setProductId] = useState(null);
+  // the tee being shown, and who you clicked to see it ({ id, who })
+  const [shown, setShown] = useState(null);
+  const productId = shown?.id;
+  const showTee = useCallback((id, who) => setShown(id ? { id, who } : null), []);
   const [bag, setBag] = useState(loadBag);
   const [bagOpen, setBagOpen] = useState(false);
   const onRoomChange = useCallback((r) => setRoom(r), []);
@@ -41,7 +44,7 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem('nekao-bag', JSON.stringify(bag.map((it) => ({ id: it.product.id, size: it.size })))); } catch { /* private mode */ }
   }, [bag]);
-  useEffect(() => { setProductId(null); setBagOpen(false); }, [path]);
+  useEffect(() => { setShown(null); setBagOpen(false); }, [path]);
 
   const [, section, slug] = path.split('/');
   const inApartment = section === 'apartment';
@@ -49,10 +52,10 @@ export default function App() {
 
   let page;
   if (!section) page = <Home />;
-  else if (inApartment && isPhone()) page = <RoomSwipe startRoom={startRoom} onRoom={onRoomChange} onShowTee={setProductId} />;
+  else if (inApartment && isPhone()) page = <RoomSwipe startRoom={startRoom} onRoom={onRoomChange} onShowTee={showTee} />;
   else if (inApartment) page = (
     <Suspense fallback={<main className="experience" />}>
-      <Experience startRoom={startRoom} onRoom={onRoomChange} onShowTee={setProductId} drawerOpen={!!productId || bagOpen} />
+      <Experience startRoom={startRoom} onRoom={onRoomChange} onShowTee={showTee} drawerOpen={!!productId || bagOpen} />
     </Suspense>
   );
   else if (section === 'shop' && slug) page = <ProductPage key={slug} product={PRODUCTS[slug]} onAdd={add} />;
@@ -89,7 +92,8 @@ export default function App() {
       <ProductDrawer
         product={productId ? PRODUCTS[productId] : null}
         roomName={inApartment && room ? room.name.toLowerCase() : null}
-        onClose={() => setProductId(null)}
+        onClose={() => setShown(null)}
+        who={shown?.who}
         onAdd={add}
       />
       <BagDrawer

@@ -62,7 +62,7 @@ export default function RoomSwipe({ startRoom = 'hall', onRoom, onShowTee }) {
                 <Link to={`/residents/${m.id}`} className="swipe-name hand">{nameOf(m)}</Link>
                 <p>“{m.lines[0]}”</p>
               </div>
-              <button type="button" className="swipe-shop" onClick={() => onShowTee(tee.id)}>
+              <button type="button" className="swipe-shop" onClick={() => onShowTee(tee.id, m.id)}>
                 Shop the look<small>{tee.price}</small>
               </button>
             </div>
