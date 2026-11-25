@@ -145,7 +145,7 @@ export function buildLivingRoom(scene, wallMat) {
   }
   const orb = new THREE.Mesh(new THREE.SphereGeometry(0.11, 32, 20), new THREE.MeshStandardMaterial({ color: '#ffe2c4', emissive: '#ffbf80', emissiveIntensity: 2.2 }));
   add(scene, orb, -2.1, 0.55, -3.8, { cast: false });
-  const orbLight = new THREE.PointLight('#ffb070', 1.4, 3, 2);
+  const orbLight = new THREE.PointLight('#ffb070', 1.0, 3, 2);
   orbLight.position.set(-2.1, 0.6, -3.8);
   scene.add(orbLight);
 

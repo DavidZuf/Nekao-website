@@ -80,7 +80,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     composer.setPixelRatio(pr);
     composer.setSize(el.clientWidth, el.clientHeight);
     composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.55, 0.55, 0.85);
+    const bloom = new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.3, 0.4, 0.9); // glow: strength, spread, threshold
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     const grade = new ShaderPass(GradeShader);
