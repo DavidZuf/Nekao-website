@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import World from '../world/World.jsx';
 import Cutscene from './Cutscene.jsx';
 import KeyHint from './KeyHint.jsx';
-import { ROOMS, PRODUCTS } from '../data.js';
+import { ROOMS, PRODUCTS, nameOf } from '../data.js';
 import { takeFrame } from '../handoff.js';
 
 // Puts it all together:
@@ -94,15 +94,21 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
       {phase === 'roam' && (
         <>
           {nearby && (
-            <div className="prompt-row">
-              <button type="button" className="prompt" onClick={() => act(nearby)}>
-                {nearby.thing ? nearby.label : `Talk to ${nearby.name}`}
-              </button>
-              {!nearby.thing && (
-                <button type="button" className="prompt prompt--shop" onClick={() => onShowTee(nearby.product)}>
-                  Shop the look · {PRODUCTS[nearby.product].price}
+            <div className="prompt-float" key={nearby.id}>
+              {!nearby.thing && <span className="prompt-name hand">{nameOf(nearby)}</span>}
+              <div className="prompt-acts">
+                <button type="button" className="prompt-act" onClick={() => act(nearby)}>
+                  <kbd>E</kbd>{nearby.thing ? nearby.label : 'say hi'}
                 </button>
-              )}
+                {!nearby.thing && (
+                  <>
+                    <i className="prompt-dot" aria-hidden="true" />
+                    <button type="button" className="prompt-act prompt-act--shop" onClick={() => onShowTee(nearby.product)}>
+                      shop the look · {PRODUCTS[nearby.product].price}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           )}
 

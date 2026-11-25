@@ -597,3 +597,45 @@ body { font-synthesis: none; }
 .keyhint p span { font-family: var(--body); font-size: 12px; color: var(--muted); letter-spacing: 0.02em; }
 .keyhint.is-used p { opacity: 0.45; }
 @media (hover: none), (max-width: 700px) { .keyhint { display: none; } }
+
+/* =========================================================
+   In-apartment prompts: floating, no boxes (option C)
+   ========================================================= */
+.prompt-float {
+  position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%); z-index: 8;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.8);
+  animation: rise-in 0.35s ease both;
+}
+.prompt-name { font-size: 90px; line-height: 0.7; color: #fff; padding-top: 0.12em; }
+.prompt-acts { display: flex; align-items: center; gap: 18px; pointer-events: auto; }
+.prompt-act {
+  display: flex; align-items: center; padding: 4px 0 6px; border: 0; background: none; cursor: pointer;
+  font-family: var(--display); font-size: 16px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream);
+  border-bottom: 1px solid rgba(240,235,225,0.6); transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.prompt-act:hover { border-color: #fff; color: #fff; }
+.prompt-act--shop { color: #ffb3cb; border-bottom-color: #ff2a6d; box-shadow: 0 7px 10px -7px #ff2a6d; }
+.prompt-act--shop:hover { color: #ffd6e4; box-shadow: 0 8px 14px -6px #ff2a6d; }
+.prompt-act kbd { font-family: var(--body); font-size: 10px; letter-spacing: 0; padding: 1px 5px; margin: 0 9px 0 0; min-width: 0; height: auto; border: 1px solid currentColor; border-radius: 3px; opacity: 0.7; background: none; text-shadow: none; }
+.prompt-dot { width: 4px; height: 4px; border-radius: 50%; background: #ff7aa8; box-shadow: 0 0 8px #ff2a6d; }
+@media (hover: none), (max-width: 700px) {
+  .prompt-float { bottom: 200px; }
+  .prompt-acts { flex-direction: column; gap: 10px; }
+  .prompt-dot { display: none; }
+  .prompt-act kbd { display: none; }
+}
+
+/* the Rooms button and conversation choices in the same language */
+.map-btn {
+  height: auto; padding: 4px 0 6px; border: 0; border-bottom: 1px solid rgba(240,235,225,0.6); background: none; backdrop-filter: none;
+  font-family: var(--display); font-size: 16px; letter-spacing: 0.2em; text-transform: uppercase; text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+}
+.map-btn:hover { border-color: #ff2a6d; box-shadow: 0 7px 10px -7px #ff2a6d; }
+.choices { gap: 22px; }
+.choices button, .choices button:first-child {
+  height: auto; padding: 4px 0 6px; border: 0; border-bottom: 1px solid rgba(240,235,225,0.6); background: none; color: var(--cream);
+  font-family: var(--display); font-style: normal; font-size: 16px; letter-spacing: 0.2em; text-transform: uppercase;
+}
+.choices button:first-child { color: #ffb3cb; border-bottom-color: #ff2a6d; box-shadow: 0 7px 10px -7px #ff2a6d; }
+.choices button:hover { color: #fff; border-bottom-color: #fff; }
