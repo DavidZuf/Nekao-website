@@ -297,10 +297,12 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
         });
         // objects you can use (the pot…)
         (living.things || []).forEach((th) => {
+          if (th.busy?.()) return;
           tmp.set(th.pos[0] - player.x, 0, th.pos[1] - player.z);
           const d = tmp.length();
           if (d < th.reach && d < best && tmp.normalize().dot(look) > 0.6) { best = d; near = { thing: true, id: th.id, label: th.label() }; }
         });
+        if ((living.things || []).some((th) => th.busy?.())) near = null; // mid-smoke: no prompts
         const key = (n) => (n ? n.id + (n.label || '') : '');
         if (key(near) !== key(lastNear)) { lastNear = near; onNearby?.(near); }
       }
@@ -318,7 +320,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
         if (shot.t >= 1 && shot.done) { const d = shot.done; shot.done = null; d(); }
       }
 
-      living.update(t);
+      living.update(t, camera);
       grade.uniforms.time.value = t % 100;
       fillPool();
       wakeSpots();

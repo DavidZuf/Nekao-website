@@ -342,15 +342,21 @@ export function buildKitchen(scene, renderer) {
       scene.add(b);
     }
   }
-  // gold ashtray with a lit cigarette
+  // gold ashtray with a lit cigarette (you can pick it up: see SMOKE below)
   put(lathe([[0, 0], [0.11, 0], [0.12, 0.03], [0.1, 0.035], [0.09, 0.015], [0, 0.015]], M.gold), 4.1, 0.94, -1.45);
+  const cigGroup = new THREE.Group(); // the cigarette + its ember, moved as one
+  const REST = new THREE.Vector3(4.1, 0.985, -1.44);
+  cigGroup.position.copy(REST);
+  scene.add(cigGroup);
   const cig = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.085, 10), new THREE.MeshStandardMaterial({ color: '#f6f2ea', roughness: 0.8 }));
   cig.rotation.z = Math.PI / 2 - 0.12; cig.rotation.y = 0.5;
-  put(cig, 4.1, 0.985, -1.44, false);
+  cig.castShadow = false;
+  cigGroup.add(cig);
   const ember = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: '#ff6a1a', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-  const tipPos = new THREE.Vector3(4.1 - 0.037, 0.99, -1.44 + 0.02);
-  ember.position.copy(tipPos); ember.scale.setScalar(0.03);
-  scene.add(ember);
+  const TIP = new THREE.Vector3(-0.037, 0.005, 0.02); // tip, relative to the cigarette's middle
+  ember.position.copy(TIP); ember.scale.setScalar(0.03);
+  cigGroup.add(ember);
+  const tipPos = new THREE.Vector3();
   const puffs = [];
   for (let i = 0; i < 14; i++) {
     const p = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: '#ddd6d0', transparent: true, opacity: 0, depthWrite: false }));
@@ -358,6 +364,84 @@ export function buildKitchen(scene, renderer) {
     scene.add(p);
     puffs.push(p);
   }
+
+  // ---------- SMOKE: take a drag ----------
+  // lift to your lips → the tip flares → exhale toward the screen → back down
+  const LIFT = 1.0, DRAG = 2.4, EXHALE = 4.8, BACK = 6.0;
+  const smoke = { t0: null, now: 0 };
+  const exhale = Array.from({ length: 22 }, (_, i) => {
+    const p = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: '#9d9592', transparent: true, opacity: 0, depthWrite: false }));
+    p.userData = { delay: i * 0.055, from: new THREE.Vector3(), dir: new THREE.Vector3(), spin: (i % 5) - 2 };
+    scene.add(p);
+    return p;
+  });
+  const v = new THREE.Vector3(), fwd = new THREE.Vector3(), up = new THREE.Vector3(), right = new THREE.Vector3();
+  const qHold = new THREE.Quaternion(), qRest = new THREE.Quaternion();
+  const tipDir = TIP.clone().normalize();
+  const towardsView = new THREE.Vector3(0.85, 0.35, -0.55).normalize(); // lit end away and to the right, so you see its length
+  const qTip = new THREE.Quaternion().setFromUnitVectors(tipDir, towardsView);
+  const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const pose = (camera, dist, down, side) => {
+    camera.getWorldDirection(fwd);
+    up.set(0, 1, 0).applyQuaternion(camera.quaternion);
+    right.crossVectors(fwd, up);
+    return v.copy(camera.position).addScaledVector(fwd, dist).addScaledVector(up, -down).addScaledVector(right, side);
+  };
+  const updateSmoke = (t, camera) => {
+    smoke.now = t;
+    if (smoke.t0 == null || !camera) return { heat: 0, held: 0 };
+    const k = t - smoke.t0;
+    qHold.copy(camera.quaternion).multiply(qTip);
+    const hold = pose(camera, 0.34, 0.06, 0.05).clone();
+    const lips = pose(camera, 0.2, 0.06, 0.0).clone();
+    let heat = 0;
+    let held = 1;
+    if (k < LIFT) {
+      const e = ease(k / LIFT);
+      cigGroup.position.lerpVectors(REST, hold, e);
+      cigGroup.quaternion.slerpQuaternions(qRest, qHold, e);
+      held = e;
+    } else if (k < DRAG) {
+      const e = ease(Math.min(1, (k - LIFT) / 0.5));
+      cigGroup.position.lerpVectors(hold, lips, e);
+      cigGroup.quaternion.copy(qHold);
+      heat = Math.min(1, (k - LIFT) / 0.6) * (0.85 + Math.random() * 0.15); // crackle
+    } else if (k < EXHALE) {
+      const e = ease(Math.min(1, (k - DRAG) / 0.6));
+      cigGroup.position.lerpVectors(lips, hold, e).addScaledVector(up, -0.05 * e);
+      cigGroup.quaternion.copy(qHold);
+      heat = Math.max(0, 1 - (k - DRAG) / 0.8);
+    } else if (k < BACK) {
+      const e = ease((k - EXHALE) / (BACK - EXHALE));
+      cigGroup.position.lerpVectors(hold.addScaledVector(up, -0.05), REST, e);
+      cigGroup.quaternion.slerpQuaternions(qHold, qRest, e);
+      held = 1 - e;
+    } else {
+      cigGroup.position.copy(REST); cigGroup.quaternion.identity();
+      smoke.t0 = null;
+      held = 0;
+    }
+    // exhale: puffs leave your mouth toward the screen, then roll up and away
+    exhale.forEach((p) => {
+      const a = k - DRAG - 0.35 - p.userData.delay;
+      if (a < 0 || a > 2.8) { p.material.opacity = 0; if (a < 0) { p.userData.from.copy(pose(camera, 0.1, 0.07, (p.userData.spin) * 0.01)); camera.getWorldDirection(p.userData.dir); } return; }
+      const f = a / 2.8;
+      p.position.copy(p.userData.from).addScaledVector(p.userData.dir, 0.45 + a * 0.5);
+      p.position.y += a * a * 0.12;
+      p.position.x += Math.sin(a * 2 + p.userData.spin) * 0.06 * a;
+      const sc = 0.12 + f * 0.9;
+      p.scale.set(sc, sc * 0.75, 1);
+      p.material.rotation = p.userData.spin * a * 0.3;
+      p.material.opacity = Math.sin(Math.min(1, f * 3) * Math.PI / 2) * (1 - f) * 0.2;
+    });
+    return { heat, held };
+  };
+  const smokeThing = {
+    id: 'cig', pos: [4.1, -1.45], reach: 1.6,
+    busy: () => smoke.t0 != null,
+    label: () => 'Want a smoke?',
+    use: () => { if (smoke.t0 == null) smoke.t0 = smoke.now; return null; }
+  };
 
   // ---------- illuminated shelving (right wall, by the window) ----------
   const sx0 = 6.45, sx1 = 7.95, sz0 = -0.42, sz1 = -0.08;
@@ -434,12 +518,18 @@ export function buildKitchen(scene, renderer) {
   const traffic = buildArcView(scene);
 
   return {
-    things,
-    update(t) {
+    things: [...things, smokeThing],
+    update(t, camera) {
       updatePot(t);
-      ember.material.opacity = 0.75 + Math.sin(t * 4.7) * 0.15 + Math.sin(t * 1.7) * 0.1;
+      const { heat, held } = updateSmoke(t, camera);
+      ember.getWorldPosition(tipPos);
+      ember.material.opacity = Math.min(1, 0.75 + Math.sin(t * 4.7) * 0.15 + Math.sin(t * 1.7) * 0.1 + heat);
+      ember.scale.setScalar(0.03 - held * 0.019 + heat * 0.024); // smaller up close, flares on the drag
+      ember.material.color.set(heat > 0.05 ? '#ff3a10' : '#ff6a1a').multiplyScalar(1 + heat * 2.5);
+      const lifted = smoke.t0 != null;
       puffs.forEach((p) => {
         const f = (t * 0.17 + p.userData.phase) % 1;
+        p.visible = !lifted; // the thin curl only rises from the ashtray
         p.position.set(tipPos.x + Math.sin(f * 6 + p.userData.phase * 8) * 0.04 * (0.3 + f), tipPos.y + 0.01 + f * 0.55, tipPos.z + Math.cos(f * 4) * 0.02);
         const s = 0.025 + f * 0.15;
         p.scale.set(s, s * 1.3, 1);
