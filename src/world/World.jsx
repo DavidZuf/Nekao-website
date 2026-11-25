@@ -57,13 +57,18 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
 
   useEffect(() => {
     const el = mount.current;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // edges are smoothed by the composer's render target, so no antialias here
+    const renderer = new THREE.WebGLRenderer({ antialias: false, logarithmicDepthBuffer: true, powerPreference: 'high-performance' });
+    // 1.25 still looks sharp on Retina and draws ~60% fewer pixels than 2
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
     renderer.setSize(el.clientWidth, el.clientHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.25;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    // nothing that casts a shadow really moves, so shadows are redrawn now
+    // and then (see the loop) instead of every frame
+    renderer.shadowMap.autoUpdate = false;
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -81,6 +86,10 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     composer.setSize(el.clientWidth, el.clientHeight);
     composer.addPass(new RenderPass(scene, camera));
     const bloom = new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.3, 0.4, 0.9); // glow: strength, spread, threshold
+    // the glow is a blur anyway: work it out at half size
+    const bloomSize = bloom.setSize.bind(bloom);
+    bloom.setSize = (w, h) => bloomSize(Math.ceil(w / 2), Math.ceil(h / 2));
+    bloom.setSize(el.clientWidth * pr, el.clientHeight * pr);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     const grade = new ShaderPass(GradeShader);
@@ -94,6 +103,57 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
       scene.add(group);
       return { data: m, group, baseFace: m.face };
     });
+    // ----- light pool -----
+    // The rooms have ~19 point lights, and every lit pixel pays for all of
+    // them, even in another room. Only the ones near you matter, so 8 real
+    // lights follow you around and take the settings of the nearest room
+    // lights each frame. The count never changes, so nothing recompiles.
+    const POOL = 8;
+    const sources = [];
+    scene.updateMatrixWorld(true);
+    scene.traverse((o) => { if (o.isPointLight) sources.push(o); });
+    sources.forEach((o) => {
+      o.userData.at = o.getWorldPosition(new THREE.Vector3());
+      o.castShadow = false; // all-round (cube) shadows cost six renders each
+      o.parent.remove(o);
+    });
+    const pool = Array.from({ length: POOL }, () => {
+      const l = new THREE.PointLight('#000000', 0, 1, 2);
+      scene.add(l);
+      return l;
+    });
+    const fillPool = () => {
+      const p = camera.position;
+      const reach = (o) => (o.distance || 40);
+      const near = sources
+        .filter((o) => o.intensity > 0.001)
+        .map((o) => ({ o, d: o.userData.at.distanceTo(p) - reach(o) }))
+        .sort((a, b) => a.d - b.d)
+        .slice(0, POOL);
+      pool.forEach((l, i) => {
+        const n = near[i]?.o;
+        if (!n) { l.intensity = 0; return; }
+        l.position.copy(n.userData.at);
+        l.color.copy(n.color);
+        l.intensity = n.intensity;
+        l.distance = n.distance;
+        l.decay = n.decay;
+      });
+    };
+
+    // Spotlights that are off (the tower beam, between passes) are taken out
+    // of the scene's lighting entirely. Both versions of every material are
+    // prepared now, so switching never stutters, and turning around doesn't
+    // either.
+    const spots = [];
+    scene.traverse((o) => { if (o.isSpotLight) spots.push(o); });
+    const sleepy = spots.filter((l) => l.intensity < 0.001);
+    sleepy.forEach((l) => { l.visible = false; });
+    renderer.compile(scene, camera);
+    sleepy.forEach((l) => { l.visible = true; });
+    renderer.compile(scene, camera);
+    const wakeSpots = () => spots.forEach((l) => { l.visible = l.intensity > 0.001; });
+    wakeSpots();
 
     // ----- player -----
     const player = { x: 0, z: 3.3, yaw: 0, pitch: 0, bob: 0 };
@@ -260,6 +320,9 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
 
       living.update(t);
       grade.uniforms.time.value = t % 100;
+      fillPool();
+      wakeSpots();
+      if (frames < 5 || frames % 30 === 0) renderer.shadowMap.needsUpdate = true;
       composer.render();
       frames += 1;
       if (frames === 4) onReady?.();
@@ -334,7 +397,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
       use(id) { const th = (living.things || []).find((x) => x.id === id); return th ? th.use() : null; },
       press(k, on) { if (on) keys.add(k); else keys.delete(k); }
     };
-    if (import.meta.env.DEV || window.__NEKAO_DEBUG) window.__nekao = { api: api.current, clock, camera, player };
+    if (import.meta.env.DEV || window.__NEKAO_DEBUG) window.__nekao = { api: api.current, clock, camera, player, renderer, composer };
 
     return () => {
       cancelAnimationFrame(raf);
