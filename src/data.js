@@ -93,6 +93,9 @@ export const MODELS = [
     // tip = the lit end of his cigarette, so the 3D smoke rises from it
     cutout: { src: '/david.png', w: 591, h: 1745, scale: 1.85 / 1737, anchor: [300, 1740], tip: [440, 130] },
     product: 'tee-black',
+    // he stops you if you walk past him (see Experience: the intercept)
+    intercept: 'Hey. Hey! You walked straight past me.',
+    greeting: 'Nobody gets into this apartment without saying hi. So. Hi.',
     lines: [
       'Read the sign. I put it there.',
       'All black, every night. It never asks me to explain myself.'

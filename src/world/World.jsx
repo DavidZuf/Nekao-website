@@ -47,13 +47,15 @@ const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // (with the models frozen inside it) replaces buildApartment + buildModel.
 // `preview` = [x, z, yaw]: a fixed, gently swaying view with no controls
 // (the peephole on the homepage).
-const World = forwardRef(function World({ active, preview, onRoom, onNearby, onPick, onReady }, ref) {
+const World = forwardRef(function World({ active, preview, onRoom, onNearby, onPick, onReady, onGate }, ref) {
   const mount = useRef(null);
   const api = useRef({});
   const activeRef = useRef(active);
   activeRef.current = active;
   const previewRef = useRef(preview);
   previewRef.current = preview;
+  const onGateRef = useRef(onGate);
+  onGateRef.current = onGate;
 
   useEffect(() => {
     const el = mount.current;
@@ -172,6 +174,18 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
 
     // keyboard: arrows (or WASD) walk and turn. That's all.
     const map = { ArrowUp: 'f', KeyW: 'f', ArrowDown: 'b', KeyS: 'b', ArrowLeft: 'tl', KeyA: 'tl', ArrowRight: 'tr', KeyD: 'tr' };
+    // the hall → living room doorway can be closed (David wants a hello first)
+    const GATE = [-0.7, -0.3, 0.7, 0.3];
+    const gate = { on: false, last: 0 };
+    const canWalk = (x, z) => {
+      if (gate.on && inRect(x, z, GATE)) {
+        const now = performance.now();
+        if (now - gate.last > 2500) { gate.last = now; onGateRef.current?.(); }
+        return false;
+      }
+      return walkable(x, z);
+    };
+
     const onDown = (e) => {
       if (!activeRef.current || mode !== 'roam') return;
       if (document.querySelector('[role="dialog"]')) return;
@@ -278,8 +292,8 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
           const fx = -Math.sin(player.yaw), fz = -Math.cos(player.yaw);
           const dx = (fx * vel.f + -fz * vel.s) * sp;
           const dz = (fz * vel.f + fx * vel.s) * sp;
-          if (walkable(player.x + dx, player.z)) player.x += dx; else vel.f *= 0.6;
-          if (walkable(player.x, player.z + dz)) player.z += dz; else vel.s *= 0.6;
+          if (canWalk(player.x + dx, player.z)) player.x += dx; else vel.f *= 0.6;
+          if (canWalk(player.x, player.z + dz)) player.z += dz; else vel.s *= 0.6;
           player.bob += dt * 8 * moving;
         }
         placeCamera();
@@ -381,6 +395,21 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
           };
         });
       },
+      setGate(on) { gate.on = on; },
+      // a cinematic camera move to a standing spot; you can walk again after
+      glideTo({ x, z, yaw, pitch = 0 }, dur = 1.6) {
+        mode = 'cinematic';
+        keys.clear();
+        const toPos = new THREE.Vector3(x, EYE, z);
+        const toQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+        return new Promise((resolve) => {
+          shot = {
+            t: 0, start: performance.now(), dur,
+            fromPos: camera.position.clone(), fromQ: camera.quaternion.clone(), toPos, toQ,
+            done: () => { Object.assign(player, { x, z, yaw, pitch }); shot = null; mode = 'roam'; placeCamera(); resolve(); }
+          };
+        });
+      },
       endTalk() {
         if (!shot) { mode = 'roam'; return Promise.resolve(); }
         const m = shot.model;
@@ -399,7 +428,7 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
       use(id) { const th = (living.things || []).find((x) => x.id === id); return th ? th.use() : null; },
       press(k, on) { if (on) keys.add(k); else keys.delete(k); }
     };
-    if (import.meta.env.DEV || window.__NEKAO_DEBUG) window.__nekao = { api: api.current, clock, camera, player, renderer, composer };
+    if (import.meta.env.DEV || window.__NEKAO_DEBUG) window.__nekao = { api: api.current, clock, camera, player, renderer, composer, canWalk };
 
     return () => {
       cancelAnimationFrame(raf);
@@ -421,6 +450,8 @@ const World = forwardRef(function World({ active, preview, onRoom, onNearby, onP
     use: (id) => api.current.use?.(id),
     currentRoom: () => api.current.currentRoom?.(),
     pose: () => api.current.pose?.(),
+    setGate: (on) => api.current.setGate?.(on),
+    glideTo: (p, d) => api.current.glideTo?.(p, d),
     snapshot: () => api.current.snapshot?.(),
     place: (p) => api.current.place?.(p)
   }));

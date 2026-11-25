@@ -2,15 +2,26 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import World from '../world/World.jsx';
 import Cutscene from './Cutscene.jsx';
 import KeyHint from './KeyHint.jsx';
-import { ROOMS, PRODUCTS, nameOf } from '../data.js';
+import { ROOMS, PRODUCTS, MODELS, nameOf } from '../data.js';
 import { takeFrame } from '../handoff.js';
 
 // Puts it all together:
 //  roam   → you walk around in 3D (arrows / WASD, drag to look)
 //  talk   → cinematic with a model (press E when close)
 //  travel → fast travel: a quick fade to another room
+// David, the doorman: nobody gets into the living room without saying hi.
+const DAVID = MODELS.find((m) => m.id === 'david');
+const wasGreeted = () => { try { return sessionStorage.getItem('nekao-greeted') === '1'; } catch { return false; } };
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
 export default function Experience({ startRoom = 'hall', onRoom, onShowTee, drawerOpen }) {
   const world = useRef(null);
+  const [greeted, setGreeted] = useState(() => !DAVID || wasGreeted());
+  const greetedRef = useRef(greeted);
+  greetedRef.current = greeted;
+  const peeked = useRef(false); // came in through the peephole
+  const talkingRef = useRef(null);
+  const [cine, setCine] = useState(null); // David's line while the camera takes you back
   const [phase, setPhase] = useState('roam');
   const [fade, setFade] = useState(false);
   const [still] = useState(takeFrame); // last peephole frame, if we came from there
@@ -35,12 +46,38 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
     let peek = null;
     try { peek = JSON.parse(sessionStorage.getItem('nekao-peek') || 'null'); } catch { /* ignore */ }
     // (it expires on its own after a few seconds, so a reload starts normally)
-    if (peek && Date.now() - peek.at < 4000) world.current?.place(peek);
+    if (peek && Date.now() - peek.at < 4000) { world.current?.place(peek); peeked.current = true; }
     else world.current?.teleport(startRoom);
   }, [startRoom]);
 
+  const say = useCallback((msg, ms = 3800) => {
+    setToast(msg); clearTimeout(say.timer); say.timer = setTimeout(() => setToast(null), ms);
+  }, []);
+
+  // the doorway stays shut until you've said hi to David
+  useEffect(() => { world.current?.setGate(!greeted); }, [greeted]);
+
+  // Through the peephole you land in the living room... for two seconds.
+  // Then David calls you out and the camera takes you back to him.
+  useEffect(() => {
+    if (!ready || !peeked.current || greetedRef.current || !DAVID) return undefined;
+    let off = false;
+    const t = setTimeout(async () => {
+      if (off) return;
+      setPhase('cine');
+      setCine(DAVID.intercept);
+      await wait(900);
+      await world.current?.glideTo({ x: 0, z: -0.8, yaw: Math.PI, pitch: 0 }, 1.3); // turn round to the door
+      await world.current?.glideTo({ x: 0.3, z: 2.1, yaw: 0.82, pitch: 0.02 }, 1.7); // back through it, to him
+      setCine(null);
+      talk({ ...DAVID, lines: [DAVID.greeting, ...DAVID.lines] });
+    }, 2000);
+    return () => { off = true; clearTimeout(t); };
+  }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const fastTravel = useCallback((room) => {
     setMapOpen(false);
+    if (!greetedRef.current && room.id !== 'hall') { say('David: say hi first.'); room = ROOMS.find((r) => r.id === 'hall'); }
     if (world.current?.currentRoom()?.id === room.id) return;
     setPhase('travel');
     setFade(true);
@@ -55,6 +92,7 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
   const talk = useCallback(async (model) => {
     if (!model) return;
     setTalking(model);
+    talkingRef.current = model;
     setTalkReady(false);
     setPhase('talk');
     setHelp(false);
@@ -65,6 +103,12 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
   const endTalk = useCallback(async () => {
     setTalkReady(false);
     await world.current?.endTalk();
+    if (talkingRef.current?.id === 'david' && !greetedRef.current) {
+      setGreeted(true);
+      try { sessionStorage.setItem('nekao-greeted', '1'); } catch { /* private mode */ }
+      say('David steps aside. Go on in.');
+    }
+    talkingRef.current = null;
     setTalking(null);
     setPhase('roam');
   }, []);
@@ -88,7 +132,7 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
 
   return (
     <main className="experience">
-      <World ref={world} active={phase === 'roam' || phase === 'talk'} onRoom={onRoom} onNearby={setNearby} onPick={(m) => phase === 'roam' && !drawerOpen && talk(m)} onReady={() => setReady(true)} />
+      <World ref={world} active={phase === 'roam' || phase === 'talk' || phase === 'cine'} onRoom={onRoom} onNearby={setNearby} onPick={(m) => phase === 'roam' && !drawerOpen && talk(m)} onReady={() => setReady(true)} onGate={() => say('David: say hi first.')} />
       {still && <img className={`handoff ${ready ? 'is-gone' : ''}`} src={still} alt="" />}
 
       {phase === 'roam' && (
@@ -154,6 +198,17 @@ export default function Experience({ startRoom = 'hall', onRoom, onShowTee, draw
       )}
 
       <div className={`travel-fade ${fade ? 'is-on' : ''}`} />
+
+      {phase === 'cine' && cine && (
+        <div className="cutscene is-ready">
+          <div className="bar bar--top" />
+          <div className="bar bar--bottom" />
+          <div className="subtitle">
+            <div className="speaker hand">{nameOf(DAVID)}</div>
+            <p>{cine}</p>
+          </div>
+        </div>
+      )}
 
       {phase === 'talk' && talking && (
         <Cutscene
