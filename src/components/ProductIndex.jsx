@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { wornBy } from '../data.js';
+import { wornBy, nameOf } from '../data.js';
 import { Link } from '../router.jsx';
 import LookVisual from './LookVisual.jsx';
 
@@ -23,7 +23,9 @@ export default function ProductIndex({ products }) {
                 <span className="rail-thumb"><LookVisual product={p} teeSize={70} /></span>
                 <span className="rail-num">{String(i + 1).padStart(2, '0')}</span>
                 <span className="rail-name">{p.name.replace(/^\[Tee name\] — /, '')}</span>
-                <span className="rail-who">{worn.length ? `on ${worn.map((w) => w.model.name).join(' & ')}` : ''}</span>
+                <span className="rail-who">
+                  {worn.length > 0 && <>on {worn.map((w, j) => <span key={w.model.id}>{j > 0 && ' & '}<span className="hand">{nameOf(w.model)}</span></span>)}</>}
+                </span>
                 <span className="rail-color">{p.color}</span>
                 <span className="rail-price">{p.price}</span>
               </Link>

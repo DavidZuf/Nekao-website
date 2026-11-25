@@ -5,7 +5,8 @@
   --muted: #c9c3b8;
   --quiet: #a8a196;
   --accent: #e8a33d;
-  --display: 'Cormorant Garamond', serif;
+  --display: 'Italiana', serif;
+  --hand: 'Mrs Saint Delafield', cursive;
   --body: 'Space Grotesk', sans-serif;
 }
 
@@ -534,3 +535,34 @@ kbd {
 .handoff { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; pointer-events: none; transition: opacity 0.5s ease 0.15s; }
 .handoff.is-gone { opacity: 0; }
 .experience:has(.handoff) .world { animation: none; }
+
+/* =========================================================
+   Type: Italiana (couture caps) + handwritten resident names
+   Italiana has one weight and no italic, so no faux bold/italic.
+   ========================================================= */
+body { font-synthesis: none; }
+.hand { font-family: var(--hand) !important; text-transform: none !important; letter-spacing: 0 !important; font-style: normal; }
+
+.section-title, .page-title, .wardrobe-head h1, .tag-card h1, .drawer .drawer-name, .swipe-top h1, .map-head h2, .footer-news h2, .about-grid h2, .help-block h2 {
+  text-transform: uppercase; letter-spacing: 0.05em; line-height: 0.95;
+}
+.wardrobe-head h1 { font-size: clamp(48px, 7vw, 96px); }
+.rail-name { text-transform: uppercase; letter-spacing: 0.08em; font-size: clamp(24px, 2.8vw, 36px); }
+.rail-who { font-size: 18px; }
+.rail-who .hand { font-size: 1.7em; line-height: 0.5; color: #ff8fb0; }
+.brand span { font-weight: 400; }
+.header .link { font-size: 18px; letter-spacing: 0.02em; }
+.card-name, .resident-name { font-weight: 400; }
+.resident-name { font-size: 54px; line-height: 0.9; margin-top: 10px; }
+.res-text h1 { font-size: clamp(110px, 14vw, 200px); line-height: 0.7; padding-top: 0.15em; }
+.res-room, .res-wearing strong, .res-actions .btn, .tag-add, .drawer-more, .drawer-where, .tag-meet em, .pdp-shot figcaption,
+.controls-help, .map-btn, .prompt, .choices button, .skip-hint, .map-note, .swipe-loading, .mobile-menu a, .header-center strong, .map-room {
+  letter-spacing: 0.03em;
+}
+.res-wearing strong { text-transform: uppercase; letter-spacing: 0.08em; font-size: 24px; }
+.tag-card h1 { font-size: clamp(36px, 3.6vw, 52px); }
+.drawer .drawer-name { font-size: 40px; }
+.speaker.hand { font-size: 52px; line-height: 0.8; color: var(--accent); }
+.swipe-name.hand { font-size: 38px; line-height: 0.8; }
+.swipe-top h1 { font-size: 30px; }
+.mobile-menu a { text-transform: uppercase; letter-spacing: 0.06em; font-size: 40px; }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { nameOf } from '../data.js';
 
 // GTA-style cinematic: black bars, name, typed-out subtitles. The choices
 // show from the start, so you can shop the look without reading every line.
@@ -68,7 +69,7 @@ export default function Cutscene({ model, product, ready, onShowTee, onClose }) 
 
       {ready && (
         <div className="subtitle">
-          <div className="speaker">{model.name}</div>
+          <div className="speaker hand">{nameOf(model)}</div>
           {!(model.cutscene && !extra) && <p>{typed}<span className="caret" /></p>}
           <div className="choices" onClick={(e) => e.stopPropagation()}>
             <button type="button" onClick={() => choose(1)}>Shop the look</button>

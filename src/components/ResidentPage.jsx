@@ -1,4 +1,4 @@
-import { MODELS, ROOMS, PRODUCTS } from '../data.js';
+import { MODELS, ROOMS, PRODUCTS, nameOf } from '../data.js';
 import { Link } from '../router.jsx';
 import Footer from './Footer.jsx';
 
@@ -38,7 +38,7 @@ export function ResidentGrid({ except }) {
         return (
           <Link key={m.id} to={`/residents/${m.id}`} className="resident">
             <Portrait model={m} />
-            <span className="resident-name">{m.name}</span>
+            <span className="resident-name hand">{nameOf(m)}</span>
             <span className="resident-meta">{room.name} · {teeName(PRODUCTS[m.product])}</span>
           </Link>
         );
@@ -59,7 +59,7 @@ export default function ResidentPage({ model }) {
         <Portrait model={model} />
         <div className="res-text">
           <Link to="/residents" className="res-back">The residents</Link>
-          <h1>{model.name}</h1>
+          <h1 className="hand">{nameOf(model)}</h1>
           <p className="res-room">Lives in the {room.name.toLowerCase()}</p>
           <div className="res-lines">
             {model.lines.map((l) => <blockquote key={l}>“{l}”</blockquote>)}

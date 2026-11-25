@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { ROOMS, PRODUCTS, residentsIn, roomView } from '../data.js';
+import { ROOMS, PRODUCTS, residentsIn, roomView, nameOf } from '../data.js';
 import { Link } from '../router.jsx';
 
 const World = lazy(() => import('../world/World.jsx'));
@@ -59,7 +59,7 @@ export default function RoomSwipe({ startRoom = 'hall', onRoom, onShowTee }) {
                 {m.cutout ? <img src={m.cutout.src} alt="" /> : <span style={{ background: tee.swatch }} />}
               </Link>
               <div className="swipe-info">
-                <Link to={`/residents/${m.id}`} className="swipe-name">{m.name}</Link>
+                <Link to={`/residents/${m.id}`} className="swipe-name hand">{nameOf(m)}</Link>
                 <p>“{m.lines[0]}”</p>
               </div>
               <button type="button" className="swipe-shop" onClick={() => onShowTee(tee.id)}>

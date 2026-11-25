@@ -151,3 +151,6 @@ export const roomView = (room) => {
   const tz = who.reduce((a, m) => a + m.pos[1], 0) / who.length;
   return [x, z, Math.atan2(-(tx - x), -(tz - z))];
 };
+
+// A resident's name without the [placeholder] brackets (for handwriting).
+export const nameOf = (m) => m.name.replace(/[[\]]/g, '');
